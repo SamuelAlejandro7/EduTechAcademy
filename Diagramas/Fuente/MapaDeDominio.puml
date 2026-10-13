@@ -1,0 +1,180 @@
+@startuml mapa_dominio_edutech
+title Mapa de Dominio - EduTech Academy (Unidad 3)
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+skinparam defaultFontName Arial
+
+skinparam class {
+    BackgroundColor<<Aggregate Root>> #E8F4FD
+    BorderColor<<Aggregate Root>> #1E88E5
+    BackgroundColor<<Value Object>> #FFF8E1
+    BorderColor<<Value Object>> #FFA000
+    BackgroundColor<<Domain Service>> #E8F5E9
+    BorderColor<<Domain Service>> #43A047
+    BackgroundColor<<Domain Event>> #F3E5F5
+    BorderColor<<Domain Event>> #8E24AA
+}
+
+package "Agregado Grupo (Límite de Cupo y Sesiones)" {
+    class Grupo <<Aggregate Root>> {
+        - GrupoId id
+        - CursoId cursoId
+        - InstructorId instructorTitularId
+        - int sesionActual
+        - EstadoGrupo estado
+        + reservarCupo(): void
+        + liberarCupo(): void
+        + validarCambioGrupo(sesionActual: int, esFuerzaMayor: bool): bool
+        + asignarInstructorSustituto(InstructorId nuevo): void
+        + verificarCancelacionCupoMinimo(): bool
+    }
+
+    class Cupo <<Value Object>> {
+        - int minimo = 8
+        - int maximo
+        - int ocupado
+        + hayDisponibilidad(): bool
+        + lugaresDisponibles(): int
+        + validarCapacidadSegunModalidad(Modalidad m): void
+    }
+
+    enum Modalidad <<Value Object>> {
+        PRESENCIAL (Max: 25)
+        EN_LINEA (Max: 40)
+    }
+
+    enum EstadoGrupo {
+        PUBLICADO
+        EN_CURSO
+        CANCELADO_POR_CUPO
+        CANCELADO_FUERZA_MAYOR
+        CERRADO
+    }
+
+    Grupo *-- Cupo
+    Grupo --> Modalidad
+    Grupo --> EstadoGrupo
+}
+
+package "Agregado Inscripción (Límite Financiero y Matrícula)" {
+    class Inscripcion <<Aggregate Root>> {
+        - InscripcionId id
+        - EstudianteId estudianteId
+        - GrupoId grupoId
+        - DateTime fechaCreacion
+        - EstadoInscripcion estado
+        + confirmarConPago(Dinero abono, DateTime fechaActual): void
+        + reubicarGrupo(GrupoId nuevoGrupoId): void
+        + cancelarPorFaltaDePago(): void
+        + tieneSaldoPendiente(): bool
+        + puedeEmitirDocumento(): bool
+    }
+
+    class Dinero <<Value Object>> {
+        - decimal monto
+        - string moneda
+        + sumar(Dinero otro): Dinero
+        + restar(Dinero otro): Dinero
+        + esMayorOIgualQue(Dinero otro): bool
+    }
+
+    enum EstadoInscripcion {
+        PREINSCRITA
+        INSCRITA_CON_SALDO
+        INSCRITA_LIQUIDADA
+        REUBICADA
+        CANCELADA_FALTA_PAGO
+        COMPLETADA
+    }
+
+    Inscripcion *-- "3" Dinero : CostoTotal / MontoPagado / SaldoPendiente
+    Inscripcion --> EstadoInscripcion
+}
+
+package "Agregado Evaluación Final (Límite Académico)" {
+    class EvaluacionFinal <<Aggregate Root>> {
+        - EvaluacionId id
+        - InscripcionId inscripcionId
+        - DateTime fechaCierreCalificaciones
+        - DictamenElegibilidad dictamen
+        + modificarCalificacion(Calificacion nueva, bool autorizadaControlEscolar): void
+        + procesarCruceAutomatico(ReglasPrograma reglas): DictamenElegibilidad
+    }
+
+    class Calificacion <<Value Object>> {
+        - decimal puntaje (0..100)
+        + esAprobatoria(decimal umbralMinimo): bool
+    }
+
+    class PorcentajeAsistencia <<Value Object>> {
+        - decimal porcentaje (0..100)
+        + cumpleAsistenciaMinima(decimal umbralMinimo): bool
+    }
+
+    enum DictamenElegibilidad <<Value Object>> {
+        ELEGIBLE_PARA_CERTIFICADO
+        ELEGIBLE_PARA_CONSTANCIA
+        NO_ACREDITADO
+    }
+
+    EvaluacionFinal *-- Calificacion
+    EvaluacionFinal *-- PorcentajeAsistencia
+    EvaluacionFinal --> DictamenElegibilidad
+}
+
+package "Agregado Certificado (Límite Legal y Acreditación)" {
+    class Certificado <<Aggregate Root>> {
+        - CertificadoId id
+        - InscripcionId inscripcionId
+        - DateTime fechaEmision
+        - TipoDocumento tipoDocumento
+        + getFolioVerificable(): string
+    }
+
+    class FolioUnico <<Value Object>> {
+        - string codigoAlfanumerico
+        + validarFormato(): bool
+    }
+
+    enum TipoDocumento {
+        CERTIFICADO_ACREDITACION
+        CONSTANCIA_PARTICIPACION
+    }
+
+    Certificado *-- FolioUnico
+    Certificado --> TipoDocumento
+}
+
+package "Servicios del Dominio" {
+    class ServicioCruceElegibilidad <<Domain Service>> {
+        + determinarElegibilidad(Calificacion c, PorcentajeAsistencia a, decimal minCal, decimal minAsist): DictamenElegibilidad
+    }
+}
+
+package "Eventos de Dominio" {
+    class InscripcionConfirmada <<Domain Event>>
+    class CupoLiberadoPorFaltaDePago <<Domain Event>>
+    class CambioGrupoAutorizado <<Domain Event>>
+    class CalificacionModificada <<Domain Event>>
+    class ElegibilidadDeterminada <<Domain Event>>
+    class CertificadoEmitido <<Domain Event>>
+    class EmisionBloqueadaPorSaldo <<Domain Event>>
+}
+
+' Relaciones entre agregados (desacopladas por ID)
+Inscripcion ..> Grupo : "referencia GrupoId"
+EvaluacionFinal ..> Inscripcion : "referencia InscripcionId"
+Certificado ..> Inscripcion : "referencia InscripcionId"
+EvaluacionFinal ..> ServicioCruceElegibilidad : "ejecuta cruce"
+
+' Emisión de eventos
+Inscripcion ..> InscripcionConfirmada : emite
+Inscripcion ..> CupoLiberadoPorFaltaDePago : emite
+Grupo ..> CambioGrupoAutorizado : emite
+EvaluacionFinal ..> CalificacionModificada : emite
+EvaluacionFinal ..> ElegibilidadDeterminada : emite
+Certificado ..> CertificadoEmitido : emite
+Inscripcion ..> EmisionBloqueadaPorSaldo : emite
+
+@enduml
