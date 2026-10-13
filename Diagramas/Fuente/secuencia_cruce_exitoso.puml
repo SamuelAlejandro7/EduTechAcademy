@@ -1,0 +1,53 @@
+@startuml secuencia_cruce_exitoso
+
+skinparam backgroundColor white
+skinparam sequenceMessageAlign center
+skinparam shadowing false
+skinparam ActorBorderColor #404040
+skinparam ParticipantBorderColor #404040
+skinparam ArrowColor #404040
+skinparam LifeLineBorderColor #8C8C8C
+skinparam NoteBackgroundColor #FFF9E0
+skinparam NoteBorderColor #B8860B
+
+title Diagrama de secuencia — CU-04 Elegibilidad de Certificación\nFlujo normal: cruce exitoso de asistencia y calificación (RN-02, RN-03)
+
+actor "Control Escolar" as ce
+participant "CertificacionApplicationService" as svc <<Application Service>>
+participant "IEvaluacionRepository" as repo <<Repository>>
+participant "ServicioCruceElegibilidad" as cruce <<Domain Service>>
+
+ce -> svc : evaluarElegibilidad(\n  EvaluarElegibilidadCommand{inscripcionId})
+activate svc
+
+svc -> repo : obtenerAsistencia(inscripcionId)
+activate repo
+repo --> svc : asistencia (porcentaje=85%)
+deactivate repo
+
+svc -> repo : obtenerCalificacionFinal(inscripcionId)
+activate repo
+repo --> svc : calificacion (valor=78)
+deactivate repo
+
+svc -> cruce : evaluar(asistencia, calificacion)
+activate cruce
+
+cruce -> cruce : validar RN-02\n(asistencia.cumpleMinimo(80%)) ✔
+cruce -> cruce : validar RN-03\n(calificacion.esAprobatoria(70)) ✔
+cruce -> cruce : construir DictamenElegibilidad\n(elegible=true)
+
+cruce --> svc : DictamenElegibilidad{elegible=true,\nmotivo="Cumple asistencia y calificación"}
+deactivate cruce
+
+svc --> ce : Estudiante elegible para certificación
+deactivate svc
+
+note over cruce
+  ServicioCruceElegibilidad es un Domain
+  Service sin estado propio: no pertenece
+  a Inscripcion ni a EvaluacionFinal porque
+  cruza datos de dos fuentes distintas.
+end note
+
+@enduml

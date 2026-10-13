@@ -1,0 +1,65 @@
+@startuml secuencia_bloqueo_saldo
+
+skinparam backgroundColor white
+skinparam sequenceMessageAlign center
+skinparam shadowing false
+skinparam ActorBorderColor #404040
+skinparam ParticipantBorderColor #404040
+skinparam ArrowColor #C00000
+skinparam LifeLineBorderColor #8C8C8C
+skinparam NoteBackgroundColor #FFF2F2
+skinparam NoteBorderColor #C00000
+
+title Diagrama de secuencia — CU-05 Emitir Certificado con Validación Financiera\nFlujo de excepción: bloqueo por saldo pendiente (RN-06, RN-22)
+
+actor "Control Escolar" as ce
+participant "CertificacionApplicationService" as svc <<Application Service>>
+participant "IUnitOfWork" as uow <<Unit of Work>>
+participant "IInscripcionRepository" as repoInsc <<Repository>>
+participant "Inscripcion" as insc <<Entity / Aggregate Root>>
+participant "ICertificadoRepository" as repoCert <<Repository>>
+
+ce -> svc : emitirCertificado(\n  EmitirCertificadoCommand{inscripcionId})
+activate svc
+
+svc -> uow : beginTransaction()
+activate uow
+uow --> svc
+deactivate uow
+
+svc -> repoInsc : obtenerPorId(inscripcionId)
+activate repoInsc
+repoInsc --> svc : inscripcion
+deactivate repoInsc
+
+svc -> insc : validarEmisionCertificado()
+activate insc
+
+insc -> insc : getSaldoPendiente(): costoCurso - montoPagado
+insc -> insc : validar RN-22\n(saldoPendiente == 0) ✘
+
+insc --> svc : throw std::runtime_error(\n"Emision bloqueada: el estudiante\nmantiene saldo pendiente de pago.")
+deactivate insc
+
+note right of insc #FFE6E6
+  RN-06 / RN-22: invariante financiero
+  absoluto. Mientras exista saldo pendiente,
+  Certificado nunca llega a crearse.
+end note
+
+svc -> uow : rollback()
+activate uow
+uow --> svc
+deactivate uow
+
+svc --> ce : Error de negocio:\n"Emisión bloqueada: saldo pendiente de pago."
+deactivate svc
+
+note over repoCert #F2F2F2
+  ICertificadoRepository no llega a
+  invocarse: la validación financiera
+  detiene el flujo antes de crear
+  el agregado Certificado.
+end note
+
+@enduml
