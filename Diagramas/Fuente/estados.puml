@@ -1,0 +1,28 @@
+@startuml estados
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam ArrowColor #404040
+skinparam state {
+  BorderColor #404040
+}
+title Máquina de estados de Operacion (src/domain/state_machine.py)
+
+state "SOLICITADA" as S #BFD7ED
+state "ACEPTADA" as A #8FB8DE
+state "INSCRITA" as I #5C8FC4
+state "FINALIZADA" as F #81C784
+state "CANCELADA" as C #E57373
+
+[*] --> S
+S --> A : aceptar()\n[puede_procesarse]\nOperacionAceptada\n(+ BeneficioReferenciaOtorgado)
+A --> I : inscribir()\n[puede_inscribirse]\nOperacionInscrita
+I --> F : finalizar()\nOperacionFinalizada
+S --> C : cancelar(motivo)\nOperacionCancelada
+F --> [*]
+C --> [*]
+note bottom of A
+  Cualquier otra combinación estado-acción
+  lanza TransicionInvalida (HTTP 409 sugerido).
+end note
+@enduml

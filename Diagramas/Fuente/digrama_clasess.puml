@@ -1,0 +1,157 @@
+@startuml ClassDiagram_CU04_CU05_Certificacion
+
+skinparam backgroundColor white
+skinparam classFontName Arial
+skinparam classFontSize 13
+skinparam classAttributeFontSize 12
+skinparam classAttributeFontName Consolas
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam linetype ortho
+skinparam padding 2
+
+skinparam class {
+  BorderColor #404040
+  ArrowColor #404040
+}
+
+title Diagrama de clases — CU-04 Elegibilidad de Certificación / CU-05 Emisión de Certificado\n(EduTech Academy)
+
+package "Aplicación" <<Rectangle>> #FFF2F2 {
+
+  class EvaluarElegibilidadCommand <<DTO / Command>> {
+    + inscripcionId : string
+  }
+
+  class EmitirCertificadoCommand <<DTO / Command>> {
+    + inscripcionId : string
+  }
+
+  class CertificacionApplicationService <<Application Service>> {
+    - evaluacionRepository : IEvaluacionRepository
+    - inscripcionRepository : IInscripcionRepository
+    - certificadoRepository : ICertificadoRepository
+    - cruceElegibilidad : ServicioCruceElegibilidad
+    - unitOfWork : IUnitOfWork
+    + evaluarElegibilidad(command: EvaluarElegibilidadCommand) : DictamenElegibilidad
+    + emitirCertificado(command: EmitirCertificadoCommand) : Certificado
+  }
+}
+
+package "Dominio" <<Rectangle>> #EAF4EA {
+
+  class Asistencia <<Value Object>> {
+    + porcentaje : double
+    + cumpleMinimo(minimo: double) : bool
+  }
+
+  class Calificacion <<Value Object>> {
+    + valor : double
+    + esAprobatoria(minimo: double) : bool
+  }
+
+  class DictamenElegibilidad <<Value Object>> {
+    + elegible : bool
+    + motivo : string
+  }
+
+  class ServicioCruceElegibilidad <<Domain Service>> {
+    + evaluar(asistencia: Asistencia, calificacion: Calificacion) : DictamenElegibilidad
+  }
+
+  class Inscripcion <<Entity / Aggregate Root>> {
+    - id : string
+    - costoCurso : Dinero
+    - montoPagado : Dinero
+    + getSaldoPendiente() : Dinero
+    + validarEmisionCertificado() : void
+  }
+
+  class Dinero <<Value Object>> {
+    + monto : double
+  }
+
+  class Certificado <<Entity / Aggregate Root>> {
+    - id : string
+    - inscripcionId : string
+    - folioUnico : string
+    - horasCursadas : int
+    - calificacionFinal : double
+    - fechaEmision : DateTime
+    + {static} emitirPara(inscripcion: Inscripcion, dictamen: DictamenElegibilidad) : Certificado
+  }
+
+  interface IEvaluacionRepository <<Repository Interface>> {
+    + obtenerAsistencia(inscripcionId: string) : Asistencia
+    + obtenerCalificacionFinal(inscripcionId: string) : Calificacion
+  }
+
+  interface IInscripcionRepository <<Repository Interface>> {
+    + obtenerPorId(id: string) : Inscripcion
+  }
+
+  interface ICertificadoRepository <<Repository Interface>> {
+    + guardar(certificado: Certificado) : void
+    + existeFolio(folio: string) : bool
+  }
+
+  interface IUnitOfWork <<Unit of Work Interface>> {
+    + beginTransaction() : void
+    + commit() : void
+    + rollback() : void
+  }
+}
+
+package "Infraestructura" <<Rectangle>> #EAF0FA {
+
+  class EvaluacionRepositorySql <<Repository Impl.>> {
+    + obtenerAsistencia(inscripcionId: string) : Asistencia
+    + obtenerCalificacionFinal(inscripcionId: string) : Calificacion
+  }
+
+  class CertificadoRepositorySql <<Repository Impl.>> {
+    + guardar(certificado: Certificado) : void
+    + existeFolio(folio: string) : bool
+  }
+}
+
+' ---- Relationships ----
+CertificacionApplicationService ..> EvaluarElegibilidadCommand : recibe
+CertificacionApplicationService ..> EmitirCertificadoCommand : recibe
+CertificacionApplicationService --> IEvaluacionRepository : usa
+CertificacionApplicationService --> IInscripcionRepository : usa
+CertificacionApplicationService --> ICertificadoRepository : usa
+CertificacionApplicationService --> IUnitOfWork : usa
+CertificacionApplicationService --> ServicioCruceElegibilidad : usa
+
+ServicioCruceElegibilidad ..> Asistencia : evalúa >
+ServicioCruceElegibilidad ..> Calificacion : evalúa >
+ServicioCruceElegibilidad ..> DictamenElegibilidad : produce >
+
+IEvaluacionRepository ..> Asistencia : obtiene >
+IEvaluacionRepository ..> Calificacion : obtiene >
+
+Inscripcion "1" *-- "2" Dinero : costoCurso / montoPagado
+Certificado ..> Inscripcion : se emite a partir de >
+Certificado ..> DictamenElegibilidad : requiere elegible=true >
+
+EvaluacionRepositorySql .up.|> IEvaluacionRepository : implementa
+CertificadoRepositorySql .up.|> ICertificadoRepository : implementa
+
+note bottom of ServicioCruceElegibilidad
+  No pertenece a una sola entidad: cruza datos
+  de asistencia y calificación (RN-02, RN-03).
+  Es un Domain Service sin estado propio.
+end note
+
+note right of Inscripcion
+  RN-06 / RN-22: validarEmisionCertificado()
+  bloquea si getSaldoPendiente() > 0.
+end note
+
+note right of Certificado
+  RN-14: folioUnico se genera y valida
+  como irrepetible antes de persistir.
+end note
+
+@enduml

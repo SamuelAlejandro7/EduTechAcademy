@@ -1,0 +1,21 @@
+﻿caso_id,operacion_id,accion,estado_inicial,resultado,estado_final,eventos,excepcion
+EDU-S001,EDU-O001,completar,SOLICITADA,EXITO,FINALIZADA,OperacionAceptada > OperacionInscrita > OperacionFinalizada,
+EDU-S002,EDU-O002,cancelar,SOLICITADA,EXITO,CANCELADA,OperacionCancelada,
+EDU-S003,EDU-O003,repetir_aprobacion,SOLICITADA,ERROR,ACEPTADA,,TRANSICION_INVALIDA: no se puede 'aceptar' una operación en estado ACEPTADA: acciones permitidas: inscribir
+EDU-S004,EDU-O004,saltar_estado,SOLICITADA,ERROR,SOLICITADA,,"TRANSICION_INVALIDA: no se puede 'finalizar' una operación en estado SOLICITADA: acciones permitidas: aceptar, cancelar"
+EDU-S005,EDU-O005,aprobar,SOLICITADA,EXITO,ACEPTADA,OperacionAceptada,
+EDU-S006,EDU-O006,completar,SOLICITADA,EXITO,FINALIZADA,OperacionAceptada > OperacionInscrita > OperacionFinalizada,
+EDU-S007,EDU-O007,cancelar,SOLICITADA,EXITO,CANCELADA,OperacionCancelada,
+EDU-S008,EDU-O008,repetir_aprobacion,SOLICITADA,ERROR,SOLICITADA,,OPERACION_NO_PROCESABLE: la operación no puede procesarse: operación autorizada
+EDU-S009,EDU-O009,saltar_estado,SOLICITADA,ERROR,SOLICITADA,,"TRANSICION_INVALIDA: no se puede 'finalizar' una operación en estado SOLICITADA: acciones permitidas: aceptar, cancelar"
+EDU-S010,EDU-O010,aprobar,SOLICITADA,EXITO,ACEPTADA,OperacionAceptada,
+EDU-S011,EDU-O011,completar,SOLICITADA,EXITO,FINALIZADA,OperacionAceptada > OperacionInscrita > OperacionFinalizada,
+EDU-S012,EDU-O012,cancelar,SOLICITADA,EXITO,CANCELADA,OperacionCancelada,
+EDU-S013,EDU-O013,repetir_aprobacion,SOLICITADA,ERROR,SOLICITADA,,OPERACION_NO_PROCESABLE: la operación no puede procesarse: operación con al menos una línea
+EDU-S014,EDU-O014,saltar_estado,SOLICITADA,ERROR,SOLICITADA,,"TRANSICION_INVALIDA: no se puede 'finalizar' una operación en estado SOLICITADA: acciones permitidas: aceptar, cancelar"
+EDU-S015,EDU-O015,aprobar,SOLICITADA,EXITO,ACEPTADA,OperacionAceptada,
+EDU-S016,EDU-O016,completar,SOLICITADA,ERROR,SOLICITADA,,OPERACION_NO_PROCESABLE: la operación no puede procesarse: operación autorizada
+EDU-S017,EDU-O017,cancelar,SOLICITADA,EXITO,CANCELADA,OperacionCancelada,
+EDU-S018,EDU-O018,repetir_aprobacion,SOLICITADA,ERROR,ACEPTADA,,TRANSICION_INVALIDA: no se puede 'aceptar' una operación en estado ACEPTADA: acciones permitidas: inscribir
+EDU-S019,EDU-O019,saltar_estado,SOLICITADA,ERROR,SOLICITADA,,"TRANSICION_INVALIDA: no se puede 'finalizar' una operación en estado SOLICITADA: acciones permitidas: aceptar, cancelar"
+EDU-S020,EDU-O020,aprobar,SOLICITADA,EXITO,ACEPTADA,OperacionAceptada,

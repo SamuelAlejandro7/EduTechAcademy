@@ -1,0 +1,120 @@
+@startuml clases_dominio
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam classFontName Arial
+skinparam classFontSize 13
+skinparam classAttributeFontSize 12
+skinparam roundcorner 8
+skinparam linetype ortho
+skinparam class {
+  BorderColor #404040
+  ArrowColor #404040
+}
+title Modelo de dominio — EduTech Academy (src/domain)
+
+package "Agregado Operacion" #EAF4EA {
+  class Operacion <<Aggregate Root>> {
+    - operacion_id : str
+    - actor_id : str
+    - fecha_solicitud : datetime
+    - promocion_activa : bool
+    - autorizado : bool
+    - referencia : str
+    - estado : EstadoOperacion
+    + total() : Dinero
+    + agregar_linea(recurso, cantidad) : LineaOperacion
+    + aceptar(actor) : void
+    + inscribir(recursos, monto_pagado) : void
+    + finalizar() : void
+    + cancelar(motivo) : void
+    + pull_events() : list
+  }
+  class LineaOperacion <<Entity>> {
+    + recurso_id : str
+    + precio_unitario : Dinero
+    + cantidad : Cantidad
+    + subtotal() : Dinero
+  }
+}
+
+package "Otros agregados" #EAF0FA {
+  class Actor <<Aggregate Root>> {
+    + actor_id : str
+    + nombre : str
+    + es_preferente : bool
+    + activo : bool
+    + ciudad : str
+  }
+  class RecursoFormativo <<Aggregate Root>> {
+    + recurso_id : str
+    + descripcion : str
+    + precio : Dinero
+    + capacidad : int
+    + habilitado : bool
+    + tiene_cupo(cantidad) : bool
+    + reservar(cantidad) : void
+  }
+}
+
+package "Value Objects" #FFF9E0 {
+  class Dinero <<Value Object>> {
+    + monto : Decimal
+    + moneda : str
+    + por(cantidad) : Dinero
+    + porcentaje(pct) : Dinero
+  }
+  class Cantidad <<Value Object>> {
+    + valor : int
+  }
+  enum EstadoOperacion <<Value Object>> {
+    SOLICITADA
+    ACEPTADA
+    INSCRITA
+    FINALIZADA
+    CANCELADA
+  }
+}
+
+package "Domain Events" #FFF2F2 {
+  abstract class EventoDeDominio {
+    + operacion_id : str
+    + ocurrido_en : datetime
+  }
+  class OperacionAceptada
+  class BeneficioReferenciaOtorgado
+  class OperacionInscrita
+  class OperacionFinalizada
+  class OperacionCancelada
+}
+
+package "Máquina de estados" #F2F2F2 {
+  class MaquinaDeEstados <<module>> {
+    + TRANSICIONES : dict
+    + siguiente_estado(estado, accion) : EstadoOperacion
+    + acciones_permitidas(estado) : tuple
+  }
+  enum Accion {
+    ACEPTAR
+    INSCRIBIR
+    FINALIZAR
+    CANCELAR
+  }
+}
+
+Operacion "1" *-- "0..*" LineaOperacion : contiene
+Operacion ..> EstadoOperacion
+Operacion ..> Dinero
+Operacion ..> MaquinaDeEstados : usa
+Operacion ..> EventoDeDominio : registra
+Operacion ..> Actor : actor_id (por id)
+LineaOperacion --> Dinero
+LineaOperacion --> Cantidad
+RecursoFormativo --> Dinero
+LineaOperacion ..> RecursoFormativo : recurso_id (por id)
+MaquinaDeEstados ..> Accion
+OperacionAceptada --|> EventoDeDominio
+BeneficioReferenciaOtorgado --|> EventoDeDominio
+OperacionInscrita --|> EventoDeDominio
+OperacionFinalizada --|> EventoDeDominio
+OperacionCancelada --|> EventoDeDominio
+@enduml

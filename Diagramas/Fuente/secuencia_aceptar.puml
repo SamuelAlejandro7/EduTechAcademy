@@ -1,0 +1,50 @@
+@startuml secuencia_aceptar
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam ParticipantBorderColor #404040
+skinparam ActorBorderColor #404040
+skinparam ArrowColor #404040
+skinparam LifeLineBorderColor #8C8C8C
+title Caso de uso: aceptar una operación (ServicioOperaciones.aplicar_accion)
+
+actor "API (Integrante 3)" as api
+participant "ServicioOperaciones" as svc <<Application Service>>
+participant "OperacionRepository" as repoO <<Port>>
+participant "ActorRepository" as repoA <<Port>>
+participant "Operacion" as op <<Aggregate Root>>
+participant "puede_procesarse()" as spec <<Specification>>
+participant "PublicadorEventos" as pub <<Port>>
+
+api -> svc : aplicar_accion(AplicarAccionCommand\n{operacion_id, ACEPTAR})
+activate svc
+svc -> repoO : obtener(operacion_id)
+repoO --> svc : operacion
+svc -> repoA : obtener(op.actor_id)
+repoA --> svc : actor
+svc -> op : aceptar(actor)
+activate op
+op -> op : siguiente_estado(SOLICITADA, ACEPTAR)
+op -> spec : is_satisfied_by(contexto)
+spec --> op : true
+op -> op : estado = ACEPTADA\nregistrar OperacionAceptada
+opt beneficio_referencia se cumple
+  op -> op : registrar BeneficioReferenciaOtorgado
+end
+op --> svc
+deactivate op
+svc -> repoO : guardar(operacion)
+svc -> op : pull_events()
+op --> svc : [eventos]
+loop por cada evento
+  svc -> pub : publicar(evento)
+end
+svc --> api : ResultadoTransicion{SOLICITADA -> ACEPTADA, eventos}
+deactivate svc
+
+note over op
+  Si la regla falla, Operacion lanza
+  OperacionNoProcesable (motivos concretos),
+  el estado NO cambia y no se publican eventos.
+end note
+@enduml

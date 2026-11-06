@@ -1,0 +1,92 @@
+@startuml bpmn_proceso_principal_edutech
+title Proceso de Negocio: Ciclo Integral de Gestión Académica y Operativa (BPMN)
+autonumber
+skinparam defaultFontName Arial
+skinparam roundcorner 8
+
+actor "Estudiante / Alumno" as Alumno
+boundary "Portal Web / API" as API
+control "Motor de Reglas & Dominio\n(Application & Domain)" as Sistema
+actor "Instructor" as Instructor
+actor "Control Escolar" as ControlEscolar
+actor "Administración" as Admin
+
+== Fase 1: Solicitud y Validación de Precondiciones (puede_procesarse) ==
+Alumno -> API: Registrar solicitud de cursos (recurso_id, cantidad)
+API -> Sistema: Crear Operacion (Estado: SOLICITADA)
+activate Sistema
+Sistema -> Sistema: Evaluar PuedeProcesarseSpecification\n(activo == 1 && detalle.count >= 1 && autorizado == 1)
+alt Precondiciones inválidas (Inactivo o no autorizado)
+    Sistema --> API: Rechazo de solicitud (HTTP 422)
+    API --> Alumno: Notificar causal de rechazo
+else Precondiciones válidas
+    Sistema -> Sistema: Transición a estado ACEPTADA
+    Sistema -> Sistema: Evaluar BeneficioReferenciaSpecification\n(VIP && total >= 1500 && !promocion_activa)
+    opt Aplica beneficio VIP
+        Sistema -> Sistema: Aplicar arancel con descuento preferente
+    end
+    Sistema --> API: Solicitud Aceptada (esperando pago)
+    API --> Alumno: Orden lista para pago (Vigencia: 3 días hábiles)
+end
+deactivate Sistema
+
+== Fase 2: Confirmación Financiera y Reserva de Cupo ==
+alt Alumno no paga dentro de los 3 días hábiles
+    Sistema -> Sistema: Temporizador expira (3 días hábiles)
+    Sistema -> Sistema: Transición a CANCELADA
+    Sistema -> Sistema: Emitir evento CupoLiberadoPorExpiracion
+else Alumno realiza pago en plazo (>= 50% anticipo)
+    Alumno -> API: Registrar comprobante de pago / abono
+    API -> Sistema: ConfirmarPagoCommand (monto)
+    activate Sistema
+    Sistema -> Sistema: Validar anticipo >= 50%
+    Sistema -> Sistema: Transición a estado INSCRITA
+    Sistema -> Sistema: Descontar plazas del Cupo disponible
+    Sistema --> API: Confirmación de inscripción
+    API --> Alumno: Notificación de matrícula formal y bienvenida
+    deactivate Sistema
+end
+
+== Fase 3: Impartición y Gestión de Modificaciones Académicas ==
+Instructor -> Sistema: Registrar asistencia por sesión
+opt Solicitud de cambio de grupo
+    Alumno -> ControlEscolar: Solicitar cambio de grupo
+    alt Sesión actual <= 3 y Grupo destino con cupo
+        ControlEscolar -> Sistema: Autorizar reubicación ordinaria
+        Sistema -> Sistema: Mover alumno y actualizar cupos
+    else Sesión actual > 3 (Excepción de Fuerza Mayor)
+        Admin -> Sistema: Autorizar cambio excepcional por fuerza mayor
+        Sistema -> Sistema: Mover alumno con marca de auditoría administrativa
+    end
+end
+
+Instructor -> Sistema: Asentar evaluaciones finales y cerrar curso
+note over Instructor, Sistema: Ventana de 5 días hábiles para ajustes directos del instructor.\nPosterior a 5 días, requiere autorización de Control Escolar.
+
+== Fase 4: Cruce Automático de Elegibilidad y Emisión Documental ==
+Sistema -> Sistema: Ejecutar ServicioCruceElegibilidad
+alt Calificación < 70 puntos
+    Sistema -> Sistema: Dictamen = NO ACREDITADO
+    Sistema --> Alumno: Notificar resultado (Habilita recursamiento con 50% de costo)
+else Calificación >= 70 y Asistencia < 80%
+    Sistema -> Sistema: Dictamen = ELEGIBLE PARA CONSTANCIA
+    alt Saldo pendiente == $0.00 MXN
+        Sistema -> Sistema: Emitir Constancia de Participación con Folio Único
+        Sistema --> Alumno: Entrega de Constancia oficial
+    else Saldo pendiente > $0.00 MXN
+        Sistema -> Sistema: Retener documento por adeudo (RN-22)
+        Sistema --> Alumno: Aviso de retención hasta liquidar saldo
+    end
+else Calificación >= 70 y Asistencia >= 80%
+    Sistema -> Sistema: Dictamen = ELEGIBLE PARA CERTIFICADO
+    alt Saldo pendiente == $0.00 MXN
+        Sistema -> Sistema: Transición a FINALIZADA
+        Sistema -> Sistema: Emitir Certificado de Acreditación con Folio Único
+        Sistema --> Alumno: Entrega formal de Certificado oficial
+    else Saldo pendiente > $0.00 MXN
+        Sistema -> Sistema: Retener certificado por adeudo (RN-22)
+        Sistema --> Alumno: Notificar adeudo pendiente para liberación de certificado
+    end
+end
+
+@enduml

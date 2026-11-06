@@ -1,0 +1,74 @@
+@startuml specifications
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam classFontName Arial
+skinparam classFontSize 13
+skinparam roundcorner 8
+skinparam class {
+  BorderColor #404040
+  ArrowColor #404040
+}
+title Patrón Specification — reglas simples y combinadores (src/domain/specifications.py)
+
+abstract class Specification {
+  + is_satisfied_by(ctx) : bool
+  + explicar(ctx) : tuple[str]
+  + __and__(otra) : Specification
+  + __or__(otra) : Specification
+  + __invert__() : Specification
+}
+class And <<Composite>>
+class Or <<Composite>>
+class Not <<Composite>>
+class ContextoEvaluacion <<DTO>> {
+  + operacion
+  + actor
+  + recursos
+  + monto_pagado
+}
+
+package "Reglas simples" #EAF4EA {
+  class ActorActivo
+  class OperacionConLineas
+  class OperacionAutorizada
+  class ActorPreferente
+  class TotalMinimo
+  class PromocionActiva
+  class RecursosHabilitados
+  class CapacidadDisponible
+  class AnticipoMinimoCubierto <<BRD RN-01>>
+}
+
+package "Reglas de negocio nombradas" #FFF9E0 {
+  class "puede_procesarse()" as pp
+  class "beneficio_referencia()" as br
+  class "puede_inscribirse()" as pi
+}
+
+And --|> Specification
+Or --|> Specification
+Not --|> Specification
+ActorActivo --|> Specification
+OperacionConLineas --|> Specification
+OperacionAutorizada --|> Specification
+ActorPreferente --|> Specification
+TotalMinimo --|> Specification
+PromocionActiva --|> Specification
+RecursosHabilitados --|> Specification
+CapacidadDisponible --|> Specification
+AnticipoMinimoCubierto --|> Specification
+And o-- Specification : izquierda, derecha
+Or o-- Specification : izquierda, derecha
+Not o-- Specification : interna
+Specification ..> ContextoEvaluacion : evalúa
+
+pp ..> ActorActivo : AND
+pp ..> OperacionConLineas : AND
+pp ..> OperacionAutorizada : AND
+br ..> ActorPreferente : AND
+br ..> TotalMinimo : AND
+br ..> PromocionActiva : NOT
+pi ..> RecursosHabilitados : AND
+pi ..> CapacidadDisponible : AND
+pi ..> AnticipoMinimoCubierto : AND (si hay pago)
+@enduml

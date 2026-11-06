@@ -1,0 +1,62 @@
+flowchart TD
+    %% ESTILOS Y COLORES
+    classDef startEvent fill:#48BB78,stroke:#2F855A,stroke-width:2px,color:#fff;
+    classDef endEvent fill:#E53E3E,stroke:#9B2C2C,stroke-width:2px,color:#fff;
+    classDef task fill:#EDF2F7,stroke:#4A5568,stroke-width:1px,color:#2D3748;
+    classDef gateway fill:#ECC94B,stroke:#B7791F,stroke-width:2px,color:#744210;
+    classDef subProcess fill:#EBF8FF,stroke:#3182CE,stroke-width:2px,color:#2B6CB0;
+
+    %% FASE 1: REGISTRO Y PRECONDICIONES
+    Inicio((Inicio: Alumno elige cursos)):::startEvent --> RegistrarSolicitud[1. Registrar Solicitud de Cursos]:::task
+    RegistrarSolicitud --> EstadoSolicitada[(Estado: SOLICITADA)]:::subProcess
+    EstadoSolicitada --> EvaluarPrecondiciones{¿Cumple puede_procesarse?<br/>activo == 1 AND detalle >= 1 AND autorizado == 1}:::gateway
+
+    EvaluarPrecondiciones -- NO --> RechazoSolicitud[Notificar Causal de Rechazo]:::task
+    RechazoSolicitud --> FinRechazo((Fin: Solicitud Rechazada)):::endEvent
+
+    EvaluarPrecondiciones -- SÍ --> EstadoAceptada[(Estado: ACEPTADA)]:::subProcess
+    EstadoAceptada --> EvaluarBeneficio{¿Aplica beneficio_referencia?<br/>VIP AND total >= 1500 AND NOT promo}:::gateway
+
+    EvaluarBeneficio -- SÍ --> AplicarDescuento[Aplicar Descuento VIP Preferente]:::task
+    EvaluarBeneficio -- NO --> MantenerPrecio[Mantener Precio Arancelario de Catálogo]:::task
+
+    AplicarDescuento --> EsperarPago[Esperar Pago - Plazo máx. 3 días hábiles]:::task
+    MantenerPrecio --> EsperarPago
+
+    %% FASE 2: CONTROL FINANCIERO Y PAGO
+    EsperarPago --> ValidarPago{¿Pago recibido en plazo?}:::gateway
+    ValidarPago -- No pagó en 3 días --> CancelarImpago[Transición a CANCELADA<br/>Liberar Cupo Temporal]:::task
+    CancelarImpago --> FinCancelado((Fin: Solicitud Expirada)):::endEvent
+
+    ValidarPago -- Pago >= 50% anticipo --> ConfirmarInscripcion[Transición a INSCRITA<br/>Descontar Cupo Oficial]:::task
+
+    %% FASE 3: IMPARTICIÓN Y EVALUACIÓN
+    ConfirmarInscripcion --> ImpartirCurso[Impartición del Programa Formativo<br/>Registro de Asistencia y Sesiones]:::task
+    ImpartirCurso --> CierreActas[Docente Asienta Calificaciones Finales<br/>Ventana ordinaria: 5 días hábiles]:::task
+
+    %% FASE 4: CRUCE AUTOMÁTICO Y EMISIÓN
+    CierreActas --> CruceAutomatico[Ejecutar ServicioCruceElegibilidad]:::task
+    CruceAutomatico --> EvaluarAcreditacion{¿Calificación final?}:::gateway
+
+    EvaluarAcreditacion -- Nota < 70 pts --> DictamenNoAcreditado[Dictamen: NO ACREDITADO<br/>Habilitar Recursamiento con 50% descuento]:::task
+    DictamenNoAcreditado --> FinNoAcreditado((Fin: Ciclo No Acreditado)):::endEvent
+
+    EvaluarAcreditacion -- Nota >= 70 pts --> EvaluarAsistencia{¿Asistencia >= 80%?}:::gateway
+
+    EvaluarAsistencia -- Asistencia < 80% --> DictamenConstancia[Dictamen: ELEGIBLE PARA CONSTANCIA]:::task
+    EvaluarAsistencia -- Asistencia >= 80% --> DictamenCertificado[Dictamen: ELEGIBLE PARA CERTIFICADO]:::task
+
+    %% VALIDACIÓN DE SALDO
+    DictamenConstancia --> ValidarSaldoConstancia{¿Saldo pendiente == $0?}:::gateway
+    ValidarSaldoConstancia -- Saldo > $0 --> RetenerConstancia[Retener Emisión por Adeudo RN-22]:::task
+    RetenerConstancia --> LiquidarSaldo1[Esperar Liquidación del Alumno]:::task
+    LiquidarSaldo1 --> EmitirConstancia[Emitir Constancia Oficial con Folio Único]:::task
+    ValidarSaldoConstancia -- Saldo == $0 --> EmitirConstancia
+    EmitirConstancia --> FinConstancia((Fin: Constancia Entregada)):::endEvent
+
+    DictamenCertificado --> ValidarSaldoCertificado{¿Saldo pendiente == $0?}:::gateway
+    ValidarSaldoCertificado -- Saldo > $0 --> RetenerCertificado[Retener Emisión por Adeudo RN-22]:::task
+    RetenerCertificado --> LiquidarSaldo2[Esperar Liquidación del Alumno]:::task
+    LiquidarSaldo2 --> TransicionFinalizada[Transición a FINALIZADA<br/>Emitir Certificado Oficial con Folio Único]:::task
+    ValidarSaldoCertificado -- Saldo == $0 --> TransicionFinalizada
+    TransicionFinalizada --> FinCertificado((Fin: Certificado Entregado)):::endEvent
