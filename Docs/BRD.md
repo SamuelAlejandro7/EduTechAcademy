@@ -4,8 +4,8 @@
 **Equipo:** #15 | **Grupo:** 004  
 **Integrantes:**
 * Samuel Alejandro Casaos Esquivel (Matrícula: 2226784) — *Persona 1: Análisis y Trazabilidad*
-* Maximiliano Romero García (Matrícula: 2226867) — *Persona 2: Arquitectura y Dominio DDD*
-* Josue Emiliano Diaz García (Matrícula: 2226766) — *Persona 3: API REST, QA y Despliegue*
+* Josue Emiliano Diaz García (Matrícula: 2226766) — *Persona 2: Arquitectura y Dominio DDD*
+* Maximiliano Romero García (Matrícula: 2226867) — *Persona 3: API REST, QA y Despliegue*
 
 **Versión:** 2.0 (Actualizada para PIA)  
 **Fecha:** Noviembre de 2026  
