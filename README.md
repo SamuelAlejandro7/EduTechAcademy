@@ -12,9 +12,9 @@
 
 | Entregables | Ubicación / Enlace de acceso |
 | :--- | :--- |
-| **Repositorio GitHub** | `[https://github.com/SamuelAlejandro7/EduTechAcademy.git](https://github.com/SamuelAlejandro7/EduTechAcademy.git)` |
-| **Panel para WEB el Usuario** | `[https://edutech-academy-api.onrender.com/panel](https://edutech-academy-api.onrender.com/panel)` |
-| **API REST Documentada (Swagger UI)** | `[https://edutech-academy-api.onrender.com/docs](https://edutech-academy-api.onrender.com/docs)` |
+| **Repositorio GitHub** | `https://github.com/SamuelAlejandro7/EduTechAcademy.git` |
+| **Panel para WEB el Usuario** | `https://edutechacademy-ue0f.onrender.com/panel` |
+| **API REST Documentada (Swagger UI)** | `https://edutechacademy-ue0f.onrender.com/docs` |
 | **Especificación OpenAPI (JSON)** | `docs/api/openapi.json` |
 
 ---
