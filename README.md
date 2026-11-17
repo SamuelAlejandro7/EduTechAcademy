@@ -8,6 +8,17 @@
 
 ---
 
+## 🔗 Entregables y Enlaces de Acceso
+
+| Entregables | Ubicación / Enlace de acceso |
+| :--- | :--- |
+| **Repositorio GitHub** | `[https://github.com/SamuelAlejandro7/EduTechAcademy.git](https://github.com/SamuelAlejandro7/EduTechAcademy.git)` |
+| **Panel para WEB el Usuario** | `[https://edutech-academy-api.onrender.com/panel](https://edutech-academy-api.onrender.com/panel)` |
+| **API REST Documentada (Swagger UI)** | `[https://edutech-academy-api.onrender.com/docs](https://edutech-academy-api.onrender.com/docs)` |
+| **Especificación OpenAPI (JSON)** | `docs/api/openapi.json` |
+
+---
+
 ## 👥 Integrantes del Equipo y Asignación de Roles
 
 | Integrante | Matrícula | Rol en el PIA | Enfoque Principal |
@@ -125,9 +136,9 @@ Los resultados se actualizan automáticamente en `Docs/resultados_pia/`.
 ```bash
 uvicorn src.Api.main:app --reload --port 8000
 ```
-* **Endpoint de bienvenida:** `http://127.0.0.1:8000/`
-* **Documentación interactiva Swagger UI:** `http://127.0.0.1:8000/docs`
-* **Documentación ReDoc:** `http://127.0.0.1:8000/redoc`
+* **Endpoint de bienvenida:** `[http://127.0.0.1:8000/](http://127.0.0.1:8000/)`
+* **Documentación interactiva Swagger UI:** `[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)`
+* **Documentación ReDoc:** `[http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)`
 
 ### 6. Ejecución con Docker Compose
 ```bash
