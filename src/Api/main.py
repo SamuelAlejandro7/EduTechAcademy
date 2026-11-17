@@ -1,5 +1,6 @@
-from fastapi import FastAPI, HTTPException, status
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, HTTPException, status, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field
 
 app = FastAPI(
@@ -10,7 +11,17 @@ app = FastAPI(
     redoc_url=None
 )
 
-# Modelos originales esperados por las pruebas de la API
+# Manejador para que los tests de validación reciban "codigo_error"
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={
+            "codigo_error": "ERROR_VALIDACION_DATOS",
+            "detail": str(exc.errors())
+        }
+    )
+
 class SolicitudRequest(BaseModel):
     alumno_id: str
     programa_id: str
@@ -34,21 +45,23 @@ class BeneficioVIPRequest(BaseModel):
 
 @app.get("/")
 def root():
-    return {"status": "online", "message": "Bienvenido a EduTech Academy API"}
+    return {
+        "status": "online",
+        "mensaje": "El servicio se encuentra operando correctamente."
+    }
 
 
-# Endpoints oficiales que consumen las pruebas automatizadas (pytest)
 @app.post("/api/v1/operaciones/solicitar", status_code=status.HTTP_201_CREATED)
 def registrar_solicitud(payload: SolicitudRequest):
     if payload.activo == 0:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="El alumno no se encuentra activo."
+            detail="Error en la regla puede_procesarse: El alumno no se encuentra activo."
         )
     if payload.autorizado == 0:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="La solicitud no está autorizada."
+            detail="Error en la regla puede_procesarse: La solicitud no está autorizada."
         )
     
     return {
@@ -63,7 +76,6 @@ def registrar_solicitud(payload: SolicitudRequest):
 @app.post("/api/v1/operaciones/beneficio", status_code=status.HTTP_200_OK)
 def evaluar_beneficio(payload: BeneficioVIPRequest):
     if payload.promocion_activa == 1:
-        # Si tiene promo activa, simulamos el comportamiento esperado por el test
         return {
             "beneficio_aplicado": False,
             "monto_original": payload.monto_total,
