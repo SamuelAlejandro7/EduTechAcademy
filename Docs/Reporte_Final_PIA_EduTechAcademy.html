@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte Final PIA — EduTech Academy — UANL FIME</title>
+<style>
+  @page {
+    size: letter portrait;
+    margin: 18mm 15mm 18mm 15mm;
+    @bottom-right {
+      content: counter(page);
+    }
+  }
+
+  :root {
+    --uanl-blue: #002e5f;
+    --uanl-gold: #bfa15f;
+    --fime-green: #005a36;
+    --text-color: #22252a;
+    --text-muted: #555e68;
+    --bg-light: #f8fafc;
+    --border-color: #d1d5db;
+    --code-bg: #f1f5f9;
+  }
+
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-color);
+    line-height: 1.5;
+    font-size: 10.5pt;
+    margin: 0;
+    padding: 20px 40px;
+    background-color: #ffffff;
+  }
+
+  @media screen {
+    body {
+      max-width: 900px;
+      margin: 20px auto;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+    }
+  }
+
+  .header-institution {
+    border-bottom: 3px double var(--uanl-blue);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header-titles h1 {
+    font-size: 15pt;
+    color: var(--uanl-blue);
+    margin: 0;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+
+  .header-titles h2 {
+    font-size: 12pt;
+    color: var(--fime-green);
+    margin: 4px 0 0 0;
+    font-weight: 600;
+  }
+
+  .badge-pia {
+    background-color: var(--uanl-blue);
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 10pt;
+    font-weight: bold;
+    text-align: right;
+  }
+
+  .report-title-box {
+    background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+    border-left: 6px solid var(--uanl-blue);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .report-title-box h3 {
+    margin: 0;
+    font-size: 14pt;
+    color: var(--uanl-blue);
+  }
+
+  .report-title-box p {
+    margin: 4px 0 0 0;
+    font-size: 10pt;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  h2.section-header {
+    font-size: 12pt;
+    color: var(--uanl-blue);
+    border-bottom: 1.5px solid var(--uanl-gold);
+    padding-bottom: 4px;
+    margin-top: 24px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  h3.subsection-header {
+    font-size: 11pt;
+    color: var(--fime-green);
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0 0 10px 0;
+    text-align: justify;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 16px 0;
+    font-size: 9.5pt;
+  }
+
+  table th {
+    background-color: #0f2d59;
+    color: #ffffff;
+    font-weight: 600;
+    text-align: left;
+    padding: 6px 10px;
+    border: 1px solid #0f2d59;
+  }
+
+  table td {
+    padding: 6px 10px;
+    border: 1px solid var(--border-color);
+    vertical-align: top;
+  }
+
+  table tr:nth-child(even) td {
+    background-color: #f8fafc;
+  }
+
+  .alert-box {
+    border-left: 4px solid var(--uanl-gold);
+    background-color: #fffdf5;
+    padding: 10px 14px;
+    margin: 12px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 9.5pt;
+  }
+
+  pre, code {
+    font-family: 'Consolas', 'Courier New', monospace;
+  }
+
+  code {
+    background-color: var(--code-bg);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 9pt;
+    color: #c026d3;
+  }
+
+  pre {
+    background-color: #1e293b;
+    color: #f8fafc;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 8.5pt;
+    overflow-x: auto;
+    margin: 10px 0;
+    line-height: 1.4;
+  }
+
+  pre code {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+  }
+
+  .tag-success {
+    background-color: #dcfce7;
+    color: #166534;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 8.5pt;
+  }
+
+  .tag-error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 8.5pt;
+  }
+
+  .tag-info {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 8.5pt;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  @media print {
+    body {
+      padding: 0;
+      max-width: 100%;
+    }
+    .no-print {
+      display: none;
+    }
+  }
+
+  .btn-print {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: var(--uanl-blue);
+    color: #ffffff;
+    border: none;
+    padding: 10px 18px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+</style>
+</head>
+<body>
+
+<button class="btn-print no-print" onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button>
+
+<div class="header-institution">
+  <div class="header-titles">
+    <h1>Universidad Autónoma de Nuevo León</h1>
+    <h2>Facultad de Ingeniería Mecánica y Eléctrica</h2>
+  </div>
+  <div class="badge-pia">
+    REPORTE DE PIA<br>
+    <span style="font-size: 8.5pt; font-weight: normal;">Noviembre 2026</span>
+  </div>
+</div>
+
+<div class="report-title-box">
+  <h3>EduTech Academy — Sistema de Gestión Académica y Operativa</h3>
+  <p><strong>Materia:</strong> Componentes de Lógica de Negocio | <strong>Equipo:</strong> #15 | <strong>Grupo:</strong> 004</p>
+  <p><strong>Catedrático:</strong> M.C. Jorge Alejandro Lozano González / M.C. Miguel Ángel Gómez Marroquín</p>
+</div>
+
+<h2 class="section-header">👥 Integrantes del Equipo y Asignación de Roles</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Integrante</th>
+      <th>Matrícula</th>
+      <th>Rol en el PIA</th>
+      <th>Responsabilidades Principales</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Samuel Alejandro Casaos Esquivel</strong></td>
+      <td>2226784</td>
+      <td><strong>Persona 1</strong></td>
+      <td><strong>Análisis de Negocio, Documentación y Trazabilidad:</strong> Elaboración del BRD, Glosario del Lenguaje Ubicuo, Historias de Usuario con Gherkin, Modelado BPMN y Matriz de Trazabilidad End-to-End.</td>
+    </tr>
+    <tr>
+      <td><strong>Josue Emiliano Diaz García</strong></td>
+      <td>2226766</td>
+      <td><strong>Persona 2</strong></td>
+      <td><strong>Arquitectura de Software, Dominio DDD y Patrones:</strong> Entidades, Value Objects, Patrón Specification, Máquina de Estados Finita, Justificación de Principios SOLID y 11 ADRs.</td>
+    </tr>
+    <tr>
+      <td><strong>Maximiliano Romero García</strong></td>
+      <td>2226867</td>
+      <td><strong>Persona 3</strong></td>
+      <td><strong>API REST, Infraestructura, QA, DevOps y Despliegue:</strong> FastAPI, OpenAPI/Swagger UI, Suite de Pruebas Automatizadas con pytest (&ge;80%), Docker Compose, CI/CD en GitHub Actions y Despliegue en Render.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 class="section-header">📚 Bibliografía (Formato APA 7.ª Edición)</h2>
+<p style="font-size: 9pt; line-height: 1.4;">
+Evans, E. (2003). <em>Domain-driven design: Tackling complexity in the heart of software</em>. Addison-Wesley.<br>
+Facultad de Ingeniería Mecánica y Eléctrica. (2026). <em>PIA: Proyecto integrador de Componentes de Lógica de Negocio</em> [Material didáctico]. Universidad Autónoma de Nuevo León.<br>
+Fowler, M. (2002). <em>Patterns of enterprise application architecture</em>. Addison-Wesley.<br>
+Evans, E., & Fowler, M. (s. f.). <em>Specifications</em>. Martin Fowler. https://martinfowler.com/apsupp/spec.pdf<br>
+FastAPI. (s. f.). <em>FastAPI documentation: Interactive API docs with Swagger UI & ReDoc</em>. https://fastapi.tiangolo.com/<br>
+GitHub. (s. f.). <em>GitHub Actions documentation: Automate your workflow from idea to production</em>. https://docs.github.com/actions<br>
+Martin, R. C. (2017). <em>Clean architecture: A craftsman's guide to software structure and design</em>. Prentice Hall.<br>
+Object Management Group. (2014). <em>Business Process Model and Notation (BPMN) versión 2.0.2</em>. https://www.omg.org/spec/BPMN/2.0.2/<br>
+Render. (s. f.). <em>Render documentation: Blueprints (render.yaml) & Web Services</em>. https://render.com/docs/blueprint-spec<br>
+SQLAlchemy Authors. (s. f.). <em>SQLAlchemy 2.0 documentation: Core and Transactions</em>. https://docs.sqlalchemy.org/<br>
+Wiggins, A. (2017). <em>The twelve-factor app</em>. https://12factor.net/
+</p>
+
+<h2 class="section-header">🎯 Objetivo General</h2>
+<p>
+Convertir el análisis y el diseño de <strong>EduTech Academy</strong> desarrollados en las Unidades 2 y 3 (BRD, User Stories, BPMN, glosario, modelo de dominio y casos de uso CU-01 a CU-05) en una solución de software funcional, verificable y desplegada en producción. La solución implementa <strong>Clean Architecture</strong> y <strong>Domain-Driven Design (DDD)</strong>, aísla las políticas con el <strong>Specification Pattern</strong> y una <strong>Máquina de Estados Finita</strong> con <strong>Domain Events</strong>, expone una <strong>API REST en FastAPI</strong> documentada con OpenAPI, maneja transacciones atómicas bajo el patrón <strong>Unit of Work</strong>, y se valida con pruebas automatizadas (&ge;80% de cobertura), integración continua (GitHub Actions), Docker Compose y despliegue funcional en Render.
+</p>
+
+<h2 class="section-header">📦 Resumen de Entregables y Ubicaciones Oficiales</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Entregable Oficial</th>
+      <th>Ubicación / URL de Acceso</th>
+      <th>Descripción y Contenido</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Repositorio GitHub</strong></td>
+      <td><code>https://github.com/SamuelAlejandro7/EduTechAcademy</code></td>
+      <td>Código fuente completo, tests, CI/CD, Docker, scripts y documentación README.</td>
+    </tr>
+    <tr>
+      <td><strong>Panel para el Usuario</strong></td>
+      <td><code>https://edutech-academy-api.onrender.com/panel</code></td>
+      <td>Interfaz web para formalizar órdenes, registrar pagos, revisar cupos y folios.</td>
+    </tr>
+    <tr>
+      <td><strong>API Swagger UI</strong></td>
+      <td><code>https://edutech-academy-api.onrender.com/docs</code></td>
+      <td>Documentación OpenAPI interactiva para pruebas de endpoints y contratos JSON.</td>
+    </tr>
+    <tr>
+      <td><strong>Especificación OpenAPI</strong></td>
+      <td><code>docs/api/openapi.json</code></td>
+      <td>Especificación formal exportada automáticamente en el pipeline de CI/CD.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<h2 class="section-header">1. Análisis del Negocio (Persona 1)</h2>
+
+<h3 class="subsection-header">Contexto, Diagnóstico y Problema Operativo</h3>
+<p>
+<strong>EduTech Academy</strong> opera en el giro de capacitación tecnológica profesional continua (Cloud, Ciberseguridad, Inteligencia Artificial, Ciencia de Datos). Sus ingresos se dividen en inscripciones individuales (B2C) y convenios empresariales con cohortes corporativas (B2B). En el modelo previo basado en hojas de cálculo de Excel y correos electrónicos se identificaron cuellos de botella severos:
+</p>
+<ul>
+  <li><strong>Validación documental demorada:</strong> Validar la autenticidad de un certificado tomaba entre 1 y 3 días hábiles.</li>
+  <li><strong>Margen de error en actas:</strong> La consolidación manual de notas y asistencias acumulaba un <strong>8% de error</strong>.</li>
+  <li><strong>Emisión de certificados tardía:</strong> La entrega física o digital tardaba hasta <strong>15 días hábiles</strong>.</li>
+  <li><strong>Identificación de alumnos en riesgo:</strong> Demandaba de 4 a 6 horas por corte escolar.</li>
+  <li><strong>Inconsistencias financieras:</strong> Emisión indebida de diplomas a estudiantes con saldo arancelario pendiente.</li>
+</ul>
+
+<h3 class="subsection-header">Actores y Matriz de Alcance</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Actor</th>
+      <th>Responsabilidades en el Negocio</th>
+      <th>Rol / Endpoint en la API</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Estudiante</strong></td>
+      <td>Solicita inscripción, paga anticipo (&ge;50%), consulta estado y verifica su certificado con folio único.</td>
+      <td>Panel Web / Endpoints públicos</td>
+    </tr>
+    <tr>
+      <td><strong>Instructor</strong></td>
+      <td>Imparte clases, registra asistencias dentro de 48 h y captura evaluaciones ponderadas.</td>
+      <td><code>inst-1</code>, <code>inst-2</code> (vía cabecera X-Usuario)</td>
+    </tr>
+    <tr>
+      <td><strong>Control Escolar</strong></td>
+      <td>Corrige asistencias excepcionales, consolida notas y ejecuta el cierre definitivo de actas.</td>
+      <td><code>ce-1</code></td>
+    </tr>
+    <tr>
+      <td><strong>Coordinación Académica</strong></td>
+      <td>Autoriza la emisión oficial de certificados y avala modificaciones extraordinarias.</td>
+      <td><code>coord-1</code></td>
+    </tr>
+    <tr>
+      <td><strong>Sistema Contable / LMS</strong></td>
+      <td>Notifica acreditación bancaria de pagos y sincroniza logs de participación virtual.</td>
+      <td>Puertos de Integración / Adapters</td>
+    </tr>
+    <tr>
+      <td><strong>Empleador / Tercero</strong></td>
+      <td>Verifica la autenticidad de certificados sin requerir autenticación ni acceso a datos personales.</td>
+      <td><code>GET /verificacion/{folio}</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 class="subsection-header">User Stories y Criterios de Aceptación Gherkin</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Rol</th>
+      <th>Necesidad</th>
+      <th>Regla</th>
+      <th>Componente / Endpoint</th>
+      <th>Estado</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>US-01</strong></td>
+      <td>Estudiante</td>
+      <td>Registrar solicitud en estado SOLICITADA.</td>
+      <td>REG-01 / RN-11</td>
+      <td><code>Operacion</code> / <code>POST .../solicitar</code></td>
+      <td><span class="tag-success">Sí (100%)</span></td>
+    </tr>
+    <tr>
+      <td><strong>US-02</strong></td>
+      <td>Estudiante</td>
+      <td>Conocer criterio y confirmar con anticipo &ge; 50%.</td>
+      <td>INV-02 / RN-01</td>
+      <td><code>AnticipoMinimoCubierto</code> / <code>POST .../pagos</code></td>
+      <td><span class="tag-success">Sí (100%)</span></td>
+    </tr>
+    <tr>
+      <td><strong>US-03</strong></td>
+      <td>Estudiante</td>
+      <td>Consultar cupos disponibles en tiempo real.</td>
+      <td>INV-03 / RN-10</td>
+      <td><code>RecursoFormativo</code> / <code>GET /cursos</code></td>
+      <td><span class="tag-success">Sí (100%)</span></td>
+    </tr>
+    <tr>
+      <td><strong>US-04</strong></td>
+      <td>Estudiante</td>
+      <td>Inscribirse a grupo (lista de espera si cupo lleno).</td>
+      <td>REG-01 / INV-04</td>
+      <td><code>puede_inscribirse</code> / <code>POST .../inscripciones</code></td>
+      <td><span class="tag-success">Sí (100%)</span></td>
+    </tr>
+    <tr>
+      <td><strong>US-06</strong></td>
+      <td>Estudiante</td>
+      <td>Plazo de pago a 3 días y liberación automática.</td>
+      <td>INV-09 / RN-16</td>
+      <td><code>siguiente_estado</code> / <code>POST .../vencimiento</code></td>
+      <td><span class="tag-success">Sí (100%)</span></td>
+    </tr>
+    <tr>
+      <td><strong>US-11</strong></td>
+      <td>Instructor</td>
+      <td>Registrar asistencia docente en ventana de 48 h.</td>
+      <td>INV-11 a 13 / RN-02</td>
+      <td><code>POST .../asistencias</code></td>
+      <td><span class="tag-success">Sí (100%)</span></td>
+    </tr>
+    <tr>
+      <td><strong>US-12</strong></td>
+      <td>Instructor</td>
+      <td>Capturar calificaciones numéricas válidas (0-100).</td>
+      <td>INV-14 a 17 / RN-03</td>
+      <td><code>POST .../evaluaciones</code></td>
+      <td><span class="tag-success">Sí (100%)</span></td>
+    </tr>
+    <tr>
+      <td><strong>US-13</strong></td>
+      <td>Control Escolar</td>
+      <td>Consolidar desempeño y cruce de elegibilidad.</td>
+      <td>INV-19, 20 / RN-02</td>
+      <td><code>ConsolidadorDeActa</code> (Domain Service)</td>
+      <td><span class="tag-success">Sí (100%)</span></td>
+    </tr>
+    <tr>
+      <td><strong>US-15</strong></td>
+      <td>Control Escolar</td>
+      <td>Cerrar acta a los 5 días y generar certificados.</td>
+      <td>INV-18, 22 a 25</td>
+      <td><code>Acta.cerrar()</code> / <code>POST /certificados</code></td>
+      <td><span class="tag-success">Sí (100%)</span></td>
+    </tr>
+    <tr>
+      <td><strong>US-19</strong></td>
+      <td>Empleador</td>
+      <td>Validar certificado público con folio/QR sin login.</td>
+      <td>REG-02 / RN-06</td>
+      <td><code>GET /verificacion/{folio}</code> (CQRS)</td>
+      <td><span class="tag-success">Sí (100%)</span></td>
+    </tr>
+    <tr>
+      <td><strong>US-21</strong></td>
+      <td>Sistema</td>
+      <td>Validar precondiciones de orden (<code>puede_procesarse</code>).</td>
+      <td>RN-11</td>
+      <td><code>PuedeProcesarseSpecification</code></td>
+      <td><span class="tag-success">Sí (100%)</span></td>
+    </tr>
+    <tr>
+      <td><strong>US-22</strong></td>
+      <td>Sistema</td>
+      <td>Beneficio VIP 15% (<code>beneficio_referencia</code>).</td>
+      <td>RN-12</td>
+      <td><code>BeneficioReferenciaSpecification</code></td>
+      <td><span class="tag-success">Sí (100%)</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="alert-box">
+  <strong>Ejemplo formal Gherkin (US-04 / RN-11):</strong><br>
+  <code>Given</code> el aspirante selecciona un curso habilitado con cupo disponible.<br>
+  <code>When</code> envía su solicitud con alumno activo, líneas &ge; 1 y aval administrativo.<br>
+  <code>Then</code> la especificación <code>puede_procesarse</code> devuelve <code>True</code> y el estado pasa a <code>ACEPTADA</code>.<br>
+  <em>Verificado en:</em> <code>tests/test_api.py::test_registrar_solicitud_exitosa</code> (HTTP 201).
+</div>
+
+<h3 class="subsection-header">1.3 Modelado de Procesos de Negocio (BPMN 2.0)</h3>
+<p>
+El proceso de negocio de <strong>EduTech Academy</strong> organiza el ciclo integral de capacitación en carriles (swimlanes) por actor: <em>Estudiante</em>, <em>Sistema Transaccional</em>, <em>Instructor</em>, <em>Control Escolar</em> y <em>Coordinación Académica</em>. Abarca desde la solicitud inicial con validación de precondiciones (<code>puede_procesarse</code>), control de cupo con lista de espera, ventana de pago de 3 días con anticipo del 50%, registro docente en 48 horas, consolidación y cierre de acta a los 5 días hábiles, hasta la emisión y verificación pública del certificado oficial con código QR y folio irrepetible.
+</p>
+
+<div style="text-align: center; margin: 16px 0;">
+  <img src="bpmn/bpmn_proceso_principal_horizontal.png" alt="Diagrama BPMN 2.0 del Proceso Principal — EduTech Academy" style="width: 100%; max-width: 850px; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+  <p style="font-size: 8.5pt; color: #64748b; margin-top: 6px; font-style: italic;">Figura 1. Modelo de Procesos de Negocio BPMN 2.0: Ciclo integral de inscripción a certificación.</p>
+</div>
+
+<h3 class="subsection-header">1.4 Glosario del Lenguaje Ubicuo</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Término de Negocio</th>
+      <th>Significado Conceptual</th>
+      <th>Mapeo en el Código Fuente</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Preinscrito</strong></td>
+      <td>Solicitud inicial registrada con lugar reservado, pendiente del anticipo del 50%.</td>
+      <td><code>EstadoOperacion.SOLICITADA</code></td>
+    </tr>
+    <tr>
+      <td><strong>Inscrito</strong></td>
+      <td>Pago de al menos el 50% acreditado formalmente; genera folio único irrevocable.</td>
+      <td><code>EstadoOperacion.INSCRITA</code>, folio <code>INS-...</code></td>
+    </tr>
+    <tr>
+      <td><strong>Liberada</strong></td>
+      <td>El cupo reservado se desestima y devuelve al catálogo por impago o cancelación.</td>
+      <td><code>EstadoOperacion.CANCELADA</code></td>
+    </tr>
+    <tr>
+      <td><strong>Acta</strong></td>
+      <td>Consolidación grupal de calificaciones y asistencias; una vez cerrada es inmutable.</td>
+      <td><code>Acta</code> (Aggregate Root)</td>
+    </tr>
+    <tr>
+      <td><strong>Criterio de Certificación</strong></td>
+      <td>Políticas de corte (Regular: 70 y 80%; Oficial: 80 y 90%).</td>
+      <td>Value Object <code>CriterioDeCertificacion</code></td>
+    </tr>
+    <tr>
+      <td><strong>Folio Único / QR</strong></td>
+      <td>Identificador alfanumérico irrepetible para consulta pública sin sesión.</td>
+      <td>Entidad <code>Certificado</code> (<code>folio</code>, <code>codigo_qr</code>)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<h2 class="section-header">2. Arquitectura de Software y Modelo de Dominio (Persona 2)</h2>
+
+<h3 class="subsection-header">Capas y Dependencias (Clean Architecture)</h3>
+<p>
+El sistema aplica una separación estricta en 4 capas concéntricas con la regla de dependencia apuntando al Dominio:
+</p>
+<ul>
+  <li><strong>Dominio Puro (<code>src/Domain/</code>):</strong> Contiene las entidades, value objects, specifications y máquina de estados. No importa FastAPI, SQLAlchemy ni librerías de infraestructura externa.</li>
+  <li><strong>Aplicación (<code>src/Application/</code>):</strong> Orquesta casos de uso (<code>ServicioOperaciones</code>) y define puertos y comandos DTO. Coordina las transacciones sin contener reglas de negocio.</li>
+  <li><strong>Infraestructura (<code>src/Infrastructure/</code>):</strong> Implementa los repositorios (PostgreSQL 16 y SQLite en memoria) y adaptadores de notificación y carga CSV.</li>
+  <li><strong>API REST (<code>src/Api/</code>):</strong> Controladores FastAPI que convierten solicitudes HTTP a comandos de aplicación y gestionan respuestas amigables en español.</li>
+</ul>
+
+<h3 class="subsection-header">Modelo de Dominio (DDD)</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Elemento DDD</th>
+      <th>Clases / Componentes</th>
+      <th>Función en el Sistema</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Aggregate Roots</strong></td>
+      <td><code>Operacion</code>, <code>Grupo</code>, <code>Inscripcion</code>, <code>Acta</code>, <code>Certificado</code>, <code>RecursoFormativo</code></td>
+      <td>Unidades de consistencia transaccional e invariantes del ciclo formativo.</td>
+    </tr>
+    <tr>
+      <td><strong>Entities</strong></td>
+      <td><code>Actor</code>, <code>LineaOperacion</code>, <code>RegistroEnListaDeEspera</code></td>
+      <td>Objetos de negocio con identidad persistente (<code>actor_id</code>, <code>recurso_id</code>).</td>
+    </tr>
+    <tr>
+      <td><strong>Value Objects</strong></td>
+      <td><code>Dinero</code> (con Decimal), <code>Cantidad</code>, <code>EstadoOperacion</code>, <code>CriterioDeCertificacion</code></td>
+      <td>Inmutables sin identidad propia. <code>Dinero</code> bloquea flotantes y garantiza precisión.</td>
+    </tr>
+    <tr>
+      <td><strong>Domain Services</strong></td>
+      <td><code>ConsolidadorDeActa</code>, <code>CalendarioDeDiasHabiles</code></td>
+      <td>Operaciones que involucran múltiples agregados (cálculo de plazos y consolidación).</td>
+    </tr>
+    <tr>
+      <td><strong>Domain Events</strong></td>
+      <td><code>OperacionAceptada</code>, <code>OperacionInscrita</code>, <code>BeneficioReferenciaOtorgado</code>, <code>OperacionCancelada</code></td>
+      <td>Notificaciones de hechos consumados persistidos exitosamente.</td>
+    </tr>
+    <tr>
+      <td><strong>Specifications</strong></td>
+      <td><code>PUEDE_PROCESARSE</code>, <code>BENEFICIO_REFERENCIA</code>, <code>PUEDE_INSCRIBIRSE</code></td>
+      <td>Reglas combinables con <code>&</code>, <code>|</code> y <code>~</code> con soporte de explicabilidad diagnóstica.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 class="subsection-header">Patrones de Diseño Implementados</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Patrón</th>
+      <th>Dónde vive en el Código</th>
+      <th>Justificación Técnica</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Aggregate</strong></td>
+      <td><code>src/Domain/entities.py</code></td>
+      <td>Protege las invariantes transaccionales (cupos, subtotales, eventos).</td>
+    </tr>
+    <tr>
+      <td><strong>Specification</strong></td>
+      <td><code>src/Domain/specifications.py</code></td>
+      <td>Reglas combinables con operadores booleanos que además diagnostican el motivo de fallo.</td>
+    </tr>
+    <tr>
+      <td><strong>State Machine</strong></td>
+      <td><code>src/Domain/state_machine.py</code></td>
+      <td>Controla el ciclo de vida y bloquea estados ilegales o saltos fuera de orden (HTTP 409).</td>
+    </tr>
+    <tr>
+      <td><strong>Unit of Work</strong></td>
+      <td><code>src/Application/ports.py</code></td>
+      <td>Garantiza atomicidad transaccional completa (COMMIT) o reversión íntegra (ROLLBACK).</td>
+    </tr>
+    <tr>
+      <td><strong>CQRS</strong></td>
+      <td><code>src/Application/dto.py</code> y <code>Api/</code></td>
+      <td>La verificación pública de certificados lee un DTO plano ligero sin exponer el agregado ni datos personales.</td>
+    </tr>
+    <tr>
+      <td><strong>Strategy</strong></td>
+      <td><code>CriterioDeCertificacion</code></td>
+      <td>Permite alternar entre criterios Regular u Oficial según el tipo de curso sin condicionales dispersos.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 class="subsection-header">Auditoría de Principios SOLID</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Principio</th>
+      <th>Implementación Real en el Código Fuente</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>S — Responsabilidad Única</strong></td>
+      <td>El cierre de acta se reparte: <code>ServicioOperaciones</code> orquesta, <code>ConsolidadorDeActa</code> arma líneas, <code>CalendarioDeDiasHabiles</code> valida plazos y <code>Acta</code> resguarda sus invariantes.</td>
+    </tr>
+    <tr>
+      <td><strong>O — Abierto / Cerrado</strong></td>
+      <td>La regla de beneficio VIP (<code>BENEFICIO_REFERENCIA</code>) se incorporó con clases nuevas (<code>ActorPreferente</code>, <code>TotalMinimo</code>, <code>PromocionActiva</code>) sin alterar la clase base <code>Specification</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>L — Sustitución de Liskov</strong></td>
+      <td>Las reglas combinadas (<code>And</code>, <code>Or</code>, <code>Not</code>) implementan <code>is_satisfied_by(ctx)</code> igual que las reglas simples; los repositorios en memoria (<code>fakes.py</code>) reemplazan a los de PostgreSQL sin fricción.</td>
+    </tr>
+    <tr>
+      <td><strong>I — Segregación de Interfaces</strong></td>
+      <td>Interfaces compactas: <code>ActorRepository</code> solo tiene <code>obtener()</code>; <code>RecursoRepository</code> tiene <code>obtener()</code> y <code>guardar()</code>; <code>PublicadorEventos</code> solo tiene <code>publicar()</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>D — Inversión de Dependencias</strong></td>
+      <td>Los servicios de aplicación dependen de interfaces abstractas en su constructor; <code>src/Domain/</code> no tiene ninguna importación de frameworks ni persistencia externa.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<h2 class="section-header">3. Implementación y Resultados del Paquete del PIA</h2>
+
+<h3 class="subsection-header">Motor de Reglas y Explicabilidad (Specification Pattern)</h3>
+<pre><code># src/Domain/specifications.py
+PUEDE_PROCESARSE = (
+    ActorActivo() & OperacionConLineas() & OperacionAutorizada()
+)  # AND estricto: requiere alumno activo, líneas >= 1 y autorización
+
+BENEFICIO_REFERENCIA = (
+    ActorPreferente() & TotalMinimo(Decimal("1500")) & ~PromocionActiva()
+)  # NOT: prohíbe duplicidad de promociones comerciales</code></pre>
+<p>
+Cuando una orden se rechaza, la función <code>explicar()</code> reporta la condición precisa insatisfecha:
+<em>«No se puede formalizar la solicitud EDU-O033: el estudiante está dado de baja.»</em>
+</p>
+
+<h3 class="subsection-header">Contrato de Respuestas y Errores de la API REST</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Código HTTP</th>
+      <th>Significado</th>
+      <th>Ejemplo Real en EduTech Academy</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>200 / 201</strong></td>
+      <td>Éxito / Recurso creado</td>
+      <td><code>{"codigo": "OPERACION_SOLICITADA", "mensaje": "Operación creada exitosamente en estatus SOLICITADA."}</code></td>
+    </tr>
+    <tr>
+      <td><strong>202</strong></td>
+      <td>Grupo lleno</td>
+      <td><code>{"mensaje": "Grupo lleno: el estudiante ha quedado registrado en lista de espera."}</code></td>
+    </tr>
+    <tr>
+      <td><strong>400</strong></td>
+      <td>Petición mal formada</td>
+      <td><code>{"mensaje": "El dato 'cantidad' debe ser mayor o igual a 1."}</code></td>
+    </tr>
+    <tr>
+      <td><strong>403</strong></td>
+      <td>Sin el rol necesario</td>
+      <td><code>{"mensaje": "El usuario ce-1 no tiene permiso para esta acción; se requiere rol Instructor."}</code></td>
+    </tr>
+    <tr>
+      <td><strong>404</strong></td>
+      <td>No existe</td>
+      <td><code>{"mensaje": "No existe el registro con ID 'EDU-O999'."}</code></td>
+    </tr>
+    <tr>
+      <td><strong>409</strong></td>
+      <td>Conflicto de estado</td>
+      <td><code>{"mensaje": "No se puede formalizar la solicitud porque está en estado INSCRITA."}</code></td>
+    </tr>
+    <tr>
+      <td><strong>422</strong></td>
+      <td>Regla incumplida</td>
+      <td><code>{"mensaje": "No se puede formalizar la solicitud EDU-O013: la operación no tiene cursos asociados."}</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 class="subsection-header">Resultados de la Homologación del Paquete del PIA (140 Casos)</h3>
+<p>
+Ejecutados a través de <code>scripts/ejecutar_casos_pia.py</code>:
+</p>
+<table>
+  <thead>
+    <tr>
+      <th>Archivo del Paquete</th>
+      <th>Total Casos</th>
+      <th>Resultados Obtenidos en el Motor del Dominio</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>casos_prueba.csv</strong></td>
+      <td>120</td>
+      <td>
+        <strong>60 validaciones (puede_procesarse):</strong> 46 procesables y 14 rechazadas (7 sin autorización, 5 con alumno inactivo y 2 sin líneas formativas).<br>
+        <strong>60 evaluaciones de beneficio (beneficio_referencia):</strong> 10 aplican el 15% VIP; 50 no aplican por no ser preferentes o poseer promoción previa.
+      </td>
+    </tr>
+    <tr>
+      <td><strong>transiciones_prueba.csv</strong></td>
+      <td>20</td>
+      <td>
+        <strong>completar:</strong> 3 Concluido y 1 rechazada (sin autorización).<br>
+        <strong>cancelar:</strong> 4 Liberada (CANCELADA).<br>
+        <strong>repetir_aprobacion:</strong> 4 rechazadas (2 con 409 por transición inválida y 2 no procesables).<br>
+        <strong>saltar_estado:</strong> 4 rechazadas (409) al violar la secuencia permitida.<br>
+        <strong>aprobar:</strong> 4 transitadas exitosamente a ACEPTADA.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 class="subsection-header">Persistencia y Consistencia Transaccional (ACID)</h3>
+<p>
+Se utiliza <strong>PostgreSQL 16</strong> en producción y Docker, y SQLite en memoria para tests rápidos. <code>SqlUnitOfWork</code> asegura que si al tramitar una orden el segundo curso no tiene cupo, la reserva del primero se revierte completamente (Rollback), evitando estados a medias. Los importes son inmutables con escala fija <code>Decimal</code> (RNF-05).
+</p>
+
+<div class="page-break"></div>
+
+<h2 class="section-header">4. Calidad, Automatización y Despliegue en la Nube (Persona 3)</h2>
+
+<h3 class="subsection-header">Pirámide de Pruebas y Cobertura de Código</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Nivel de Prueba</th>
+      <th>Archivos de Prueba</th>
+      <th>Pruebas</th>
+      <th>Cobertura</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Unitarias (Dominio Puro)</strong></td>
+      <td><code>test_operacion.py</code>, <code>test_specifications.py</code>, <code>test_state_machine.py</code>, <code>test_value_objects.py</code></td>
+      <td>80+</td>
+      <td>100% de la lógica pura</td>
+    </tr>
+    <tr>
+      <td><strong>Integración y Servicios</strong></td>
+      <td><code>test_servicios.py</code>, <code>test_reglas_negocio.py</code>, <code>fakes.py</code></td>
+      <td>230+</td>
+      <td>Servicios y UoW</td>
+    </tr>
+    <tr>
+      <td><strong>API REST (E2E)</strong></td>
+      <td><code>test_api.py</code> (FastAPI TestClient)</td>
+      <td>26</td>
+      <td>Códigos HTTP y contratos</td>
+    </tr>
+    <tr>
+      <td><strong>TOTAL COMBINADO</strong></td>
+      <td><strong>Suite global pytest</strong></td>
+      <td><strong>340+</strong></td>
+      <td><strong>&gt; 98% (Exigido: &ge; 80%)</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 class="subsection-header">Pipeline CI/CD en GitHub Actions y Despliegue</h3>
+<ul>
+  <li><strong>CI/CD (<code>.github/workflows/ci.yml</code>):</strong> Ejecuta linting con Ruff, valida las pruebas unitarias y de integración sobre Python 3.10, y exige una cobertura mínima de código del 80% (<code>--cov-fail-under=80</code>).</li>
+  <li><strong>Docker Compose:</strong> Orquesta la base de datos PostgreSQL 16 y el contenedor de FastAPI en red aislada.</li>
+  <li><strong>Despliegue en Render:</strong> Web Service configurado con <code>render.yaml</code>. El endpoint de salud en producción confirma estado óptimo:
+  <pre><code>GET https://edutech-academy-api.onrender.com/salud
+{"estado": "ok", "entorno": "produccion", "baseDeDatos": "postgresql", "solicitudes_activas": 60}</code></pre>
+  </li>
+</ul>
+
+<h3 class="subsection-header">Guión de Demostración para la Defensa (7 Pasos)</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Paso</th>
+      <th>Acción (Panel o Swagger UI)</th>
+      <th>Qué Demuestra ante el Docente</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>1</strong></td>
+      <td>Reiniciar datos de demo (<code>POST /demo/reiniciar</code>)</td>
+      <td>Carga limpia de los 140 casos provistos por la cátedra.</td>
+    </tr>
+    <tr>
+      <td><strong>2</strong></td>
+      <td>Revisar solicitud VIP <code>EDU-O001</code></td>
+      <td>Evaluación de precondiciones y aplicación del 15% de descuento VIP.</td>
+    </tr>
+    <tr>
+      <td><strong>3</strong></td>
+      <td>Formalizar <code>EDU-O001</code> dos veces seguidas</td>
+      <td>Primera petición responde 200; la segunda responde 409 por regla de la Máquina de Estados.</td>
+    </tr>
+    <tr>
+      <td><strong>4</strong></td>
+      <td>Formalizar <code>EDU-O013</code> y <code>EDU-O033</code></td>
+      <td>Responde 422 diagnosticando: "solicitud sin cursos" y "alumno dado de baja".</td>
+    </tr>
+    <tr>
+      <td><strong>5</strong></td>
+      <td>Inscribir a grupo y abonar anticipo del 50%</td>
+      <td>Transición exitosa a INSCRITA, reserva de vacante y emisión de folio único.</td>
+    </tr>
+    <tr>
+      <td><strong>6</strong></td>
+      <td>Registrar asistencia con usuario <code>ce-1</code></td>
+      <td>Responde 403 Forbidden demostrando el control de acceso por roles docentes.</td>
+    </tr>
+    <tr>
+      <td><strong>7</strong></td>
+      <td>Cierre de acta, emisión y verificación</td>
+      <td>Cierre de acta grupal, emisión de certificado con QR y verificación pública (CQRS).</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<h2 class="section-header">5. Matriz de Trazabilidad End-to-End</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Requerimiento</th>
+      <th>User Story</th>
+      <th>Regla / Invariante</th>
+      <th>Componente de Dominio</th>
+      <th>Endpoint API</th>
+      <th>Prueba Automatizada</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>RF-01: Catálogo</strong></td>
+      <td>US-01</td>
+      <td>INV-01</td>
+      <td><code>RecursoFormativo</code></td>
+      <td><code>GET /cursos</code></td>
+      <td><code>test_operacion.py</code></td>
+    </tr>
+    <tr>
+      <td><strong>RF-02: Solicitud</strong></td>
+      <td>US-01</td>
+      <td>REG-01 / RN-11</td>
+      <td><code>Operacion</code></td>
+      <td><code>POST .../solicitar</code></td>
+      <td><code>test_api.py::test_registrar_solicitud_exitosa</code></td>
+    </tr>
+    <tr>
+      <td><strong>RF-03: Procesabilidad</strong></td>
+      <td>US-21</td>
+      <td>RN-11</td>
+      <td><code>puede_procesarse()</code></td>
+      <td>Validación interna</td>
+      <td><code>test_specifications.py</code></td>
+    </tr>
+    <tr>
+      <td><strong>RF-04: Descuento VIP</strong></td>
+      <td>US-22</td>
+      <td>RN-12</td>
+      <td><code>beneficio_referencia()</code></td>
+      <td><code>POST .../beneficio</code></td>
+      <td><code>test_api.py::test_evaluar_beneficio_vip_exitoso</code></td>
+    </tr>
+    <tr>
+      <td><strong>RF-05: Anticipo 50%</strong></td>
+      <td>US-02</td>
+      <td>RN-01</td>
+      <td><code>AnticipoMinimoCubierto</code></td>
+      <td><code>POST .../pagos</code></td>
+      <td><code>test_servicios.py</code></td>
+    </tr>
+    <tr>
+      <td><strong>RF-06: Vencimiento 3d</strong></td>
+      <td>US-03, 06</td>
+      <td>RN-16</td>
+      <td><code>siguiente_estado()</code></td>
+      <td><code>POST .../vencimiento</code></td>
+      <td><code>test_state_machine.py</code></td>
+    </tr>
+    <tr>
+      <td><strong>RF-07: Cupos</strong></td>
+      <td>US-03, 04</td>
+      <td>RN-10 / INV-03</td>
+      <td><code>RecursoFormativo.reservar</code></td>
+      <td><code>POST .../inscripciones</code></td>
+      <td><code>test_operacion.py</code></td>
+    </tr>
+    <tr>
+      <td><strong>RF-08: Asistencia</strong></td>
+      <td>US-11</td>
+      <td>INV-11 / RN-02</td>
+      <td><code>AsistenciaRegistrada</code></td>
+      <td><code>POST .../asistencias</code></td>
+      <td><code>test_servicios.py</code></td>
+    </tr>
+    <tr>
+      <td><strong>RF-09: Evaluaciones</strong></td>
+      <td>US-12, 13</td>
+      <td>RN-03 / INV-14</td>
+      <td><code>ConsolidadorDeActa</code></td>
+      <td><code>POST .../evaluaciones</code></td>
+      <td><code>test_servicios.py</code></td>
+    </tr>
+    <tr>
+      <td><strong>RF-10: Cierre de Acta</strong></td>
+      <td>US-14, 15</td>
+      <td>INV-18 a 22</td>
+      <td><code>Acta.cerrar()</code></td>
+      <td><code>POST .../acta/cierre</code></td>
+      <td><code>test_servicios.py</code></td>
+    </tr>
+    <tr>
+      <td><strong>RF-11: Certificado</strong></td>
+      <td>US-15, 20</td>
+      <td>RN-06 / INV-25</td>
+      <td><code>Certificado</code>, Folio</td>
+      <td><code>POST /certificados</code></td>
+      <td><code>test_api.py</code></td>
+    </tr>
+    <tr>
+      <td><strong>RF-12: Verificación</strong></td>
+      <td>US-19</td>
+      <td>REG-02</td>
+      <td>Vista CQRS Certificado</td>
+      <td><code>GET /verificacion/{folio}</code></td>
+      <td><code>test_api.py</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 class="section-header">6. Conclusiones</h2>
+<p>
+El desarrollo del presente Producto Integrador de Aprendizaje (PIA) demostró la efectividad práctica de aplicar <strong>Domain-Driven Design (DDD)</strong> y <strong>Clean Architecture</strong> en sistemas transaccionales con alta densidad normativa:
+</p>
+<ol>
+  <li><strong>Aislamiento de la Lógica de Negocio:</strong> Las políticas académicas y comerciales residen puras en el Dominio, independientes de frameworks y motores SQL, lo cual garantizó pruebas unitarias instantáneas y cero acoplamiento.</li>
+  <li><strong>Explicabilidad mediante Specification Pattern:</strong> Descomponer condiciones complejas en especificaciones atómicas no solo facilitó su combinación booleana, sino que permitió reportar al usuario con precisión diagnóstica la causa de rechazo de una orden.</li>
+  <li><strong>Transaccionalidad Determinista y Consistencia:</strong> La Máquina de Estados Finita y el patrón Unit of Work garantizaron que nunca existan órdenes en estados ilegales ni reservas de cupo inconsistentes.</li>
+  <li><strong>Calidad y Despliegue Continuo:</strong> La cobertura de pruebas superior al 98%, el pipeline de GitHub Actions y el despliegue funcional en la nube acreditan una solución lista para operación real bajo los estándares de la industria del software.</li>
+</ol>
+
+<hr style="border: 0; border-top: 1px solid #ccc; margin-top: 30px;">
+<div style="display: flex; justify-content: space-between; font-size: 8.5pt; color: #777;">
+  <span>Facultad de Ingeniería Mecánica y Eléctrica — UANL</span>
+  <span>Componentes de Lógica de Negocio — PIA 2026</span>
+  <span>Equipo #15 | Grupo 004</span>
+</div>
+
+</body>
+</html>
