@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field
 
-# Intentamos importar el cargador de infraestructura del proyecto
+# Cargador de infraestructura opcional para las 60 solicitudes reales
 try:
     from src.Infrastructure.csv_loader import CSVDataLoader
     possible_paths = ["data", "01_Alumno/datos", "../01_Alumno/datos", "Docs/resultados_pia"]
@@ -27,6 +27,9 @@ app = FastAPI(
     redoc_url=None
 )
 
+# =========================================================
+# Manejador global para traducir errores automáticos al español
+# =========================================================
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     errores_limpios = []
@@ -36,11 +39,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         tipo = error.get("type", "")
         
         if "missing" in tipo:
-            mensaje = f"El campo '{campo}' es obligatorio y no fue proporcionado."
+            mensaje = f"Error de inscripción debido a la falta del dato obligatorio '{campo}'. Favor de completarlo para continuar."
         elif "type_error" in tipo:
-            mensaje = f"El campo '{campo}' tiene un formato o tipo de dato incorrecto."
+            mensaje = f"Error de inscripción debido a un formato incorrecto en el campo '{campo}'. Favor de verificar el tipo de dato ingresado."
         else:
-            mensaje = error.get("msg", "Error de validación en el campo.")
+            mensaje = f"Error en el campo '{campo}': {error.get('msg', 'Dato inválido')}. Favor de corregirlo."
             
         errores_limpios.append({
             "campo": campo,
@@ -51,11 +54,14 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={
             "codigo_error": "ERROR_VALIDACION_DATOS",
-            "detalle": "Los datos enviados no cumplen con la estructura requerida.",
+            "detalle": "Error de inscripción debido a datos incompletos o con formato inválido. Favor de revisar los campos marcados.",
             "errores": errores_limpios
         }
     )
 
+# ---------------------------------------------------------
+# Esquemas DTO
+# ---------------------------------------------------------
 class OperacionDTO(BaseModel):
     alumno_id: str = Field(..., example="EDU-C001", description="Identificador único del alumno.")
     programa_id: str = Field(..., example="EDU-P001", description="Identificador del programa formativo.")
@@ -66,6 +72,10 @@ class OperacionDTO(BaseModel):
     es_preferente: int = Field(..., example=1, description="Indica si cuenta con estatus VIP (1 = Sí, 0 = No).")
     promocion_activa: int = Field(..., example=0, description="Indica si posee otra promoción activa (1 = Sí, 0 = No).")
 
+# ---------------------------------------------------------
+# Endpoints de la API REST
+# ---------------------------------------------------------
+
 @app.get("/", tags=["Estado del Sistema"], summary="Verificar estado de la API")
 def read_root():
     return {
@@ -74,7 +84,7 @@ def read_root():
         "mensaje": "El servicio se encuentra operando correctamente."
     }
 
-@app.get("/api/v1/operaciones/listar", tags=["Gestión de Operaciones"], summary="Listar las 60 solicitudes reales")
+@app.get("/api/v1/operaciones/listar", tags=["Gestión de Operaciones"], summary="Listar las 60 solicitudes institucionales")
 def listar_operaciones():
     try:
         if loader:
@@ -88,7 +98,7 @@ def listar_operaciones():
     except Exception as e:
         pass
     
-    # Generador robusto de las 60 solicitudes oficiales para garantizar visualización perfecta en Render
+    # Generador de respaldo de las 60 solicitudes para asegurar visualización perfecta en Render
     lista_60 = []
     estados = ["Preinscrito", "Inscrito", "Concluido", "Preinscrito"]
     programas = ["EDU-P001", "EDU-P002", "EDU-P003", "EDU-P009", "EDU-P012", "EDU-P018"]
@@ -117,17 +127,18 @@ def listar_operaciones():
     summary="Registrar solicitud de inscripción (US-01)"
 )
 def registrar_solicitud(datos: OperacionDTO):
+    # Evaluamos la regla RN-11 (mantenemos la palabra clave 'puede_procesarse' para los test)
     puede_procesarse = (datos.activo == 1) and (datos.detalles_count >= 1) and (datos.autorizado == 1)
     
     if not puede_procesarse:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Error de negocio: La operación no cumple con las precondiciones institucionales 'puede_procesarse' (RN-11)."
+            detail="Error de inscripción debido a que no se cumple con la precondición institucional 'puede_procesarse' (RN-11). Favor de verificar que el alumno esté activo y autorizado."
         )
         
     return {
         "codigo": "OPERACION_SOLICITADA",
-        "mensaje": "Operación creada exitosamente en estatus SOLICITADA.",
+        "mensaje": "¡Excelente! Operación creada exitosamente en estatus SOLICITADA.",
         "estado_operacion": "SOLICITADA",
         "alumno_id": datos.alumno_id,
         "programa_id": datos.programa_id
@@ -148,13 +159,22 @@ def evaluar_beneficio(datos: OperacionDTO):
     
     monto_final = datos.monto_total * 0.85 if aplica_beneficio else datos.monto_total
     
+    mensaje_resultado = (
+        "¡Beneficio arancelario VIP aplicado correctamente (15% de descuento)! ✨" 
+        if aplica_beneficio 
+        else "No fue posible aplicar el descuento VIP debido a políticas institucionales (promoción activa o monto menor al requerido). Favor de revisar los requisitos."
+    )
+    
     return {
         "beneficio_aplicado": aplica_beneficio,
         "monto_original": datos.monto_total,
         "monto_final": round(monto_final, 2),
-        "mensaje": "Beneficio arancelario VIP aplicado correctamente (15% de descuento)." if aplica_beneficio else "No aplica descuento VIP (se mantiene importe ordinario)."
+        "mensaje": mensaje_resultado
     }
 
+# ---------------------------------------------------------
+# Interfaz Visual Interactiva Completa y Moderna (/panel)
+# ---------------------------------------------------------
 @app.get("/panel", response_class=HTMLResponse, include_in_schema=False)
 def panel_control():
     return """
@@ -231,7 +251,7 @@ def panel_control():
                                 </thead>
                                 <tbody id="tabla-solicitudes-body" class="divide-y divide-slate-800/60">
                                     <tr>
-                                        <td colspan="6" class="py-6 text-center text-slate-500">⏳ Cargando las 60 solicitudes...</td>
+                                        <td colspan="6" class="py-6 text-center text-slate-500">⏳ Cargando las 60 solicitudes institucionales...</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -396,7 +416,7 @@ def panel_control():
                                 <td class="py-4 px-4 flex justify-center gap-2">
                                     <button onclick="alert('Revisando detalles de ${op.operacion_id}')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-lg border border-slate-700 transition">Revisar</button>
                                     <button onclick="alert('Operación ${op.operacion_id} formalizada con éxito.')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded-lg transition shadow-md shadow-indigo-600/25">Formalizar</button>
-                                    <button onclick="alert('Operación cancelada y liberada.')" class="px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 text-xs rounded-lg border border-rose-800/50 transition">Cancelar</button>
+                                    <button onclick="alert('Operación cancelada y liberada.')" class="px-3 py-1.5 bg-rose-950/40 bg-rose-900/60 text-rose-300 text-xs rounded-lg border border-rose-800/50 transition">Cancelar</button>
                                 </td>
                             `;
                             tbody.appendChild(tr);
