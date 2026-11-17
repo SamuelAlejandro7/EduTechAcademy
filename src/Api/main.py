@@ -1,35 +1,83 @@
-from fastapi import FastAPI, Request, HTTPException, status
-from fastapi.responses import JSONResponse, HTMLResponse
-from fastapi.exceptions import RequestValidationError
-from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi import FastAPI, HTTPException, status
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
+from typing import Optional
 
-# Inicialización de la API
 app = FastAPI(
-    title="🌟 EduTech Academy · Portal de Lógica de Negocio",
-    description="Sistema oficial de gestión académica y operativa (PIA UANL FIME).",
+    title="EduTech Academy API",
+    description="API moderna con diseño personalizado para gestión y reglas de negocio (PIA FIME).",
     version="2.0.0",
-    docs_url=None  # Desactivamos el docs por defecto para personalizarlo
+    docs_url="/docs",
+    redoc_url=None
 )
 
-# =========================================================
-# Swagger UI Personalizado (Diseño moderno, no plano)
-# =========================================================
-@app.get("/docs", include_in_schema=False)
-async def custom_swagger_ui_html():
-    return get_swagger_ui_html(
-        openapi_url=app.openapi_url,
-        title="EduTech Academy · Documentación Interactiva",
-        swagger_js_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js",
-        swagger_css_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css",
-        swagger_favicon_url="https://fastapi.tiangolo.com/img/favicon.png",
-    )
+# Modelos de Pydantic para las Reglas de Negocio
+class SolicitudRequest(BaseModel):
+    alumno_id: str = Field(..., example="EDU-C001")
+    estatus_activo: bool = Field(True, description="¿El alumno está activo?")
+    autorizado: bool = Field(True, description="¿La solicitud está autorizada?")
+    cantidad_cursos: int = Field(..., ge=1, le=10, description="Número de cursos seleccionados")
 
-# =========================================================
-# Panel Web Visual e Interactivo (/panel)
-# =========================================================
-@app.get("/panel", response_class=HTMLResponse, tags=["Interfaz Visual"])
-async def panel_interactivo():
+class BeneficioVIPRequest(BaseModel):
+    monto_total: float = Field(..., gt=0, example=1800.0)
+    es_preferente: bool = Field(True, description="¿Es cliente/estudiante preferente?")
+    promocion_activa: bool = Field(False, description="¿Tiene otra promoción activa?")
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    return {"message": "Bienvenido a EduTech Academy API. Visita /panel para la interfaz visual o /docs para la documentación."}
+
+
+# Endpoint para Regla de Negocio RN-11 (Simulación lógica)
+@app.post("/api/v1/solicitudes/registrar")
+def registrar_solicitud(payload: SolicitudRequest):
+    if not payload.estatus_activo:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El alumno no se encuentra activo en el sistema."
+        )
+    if not payload.autorizado:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La solicitud no cuenta con la autorización requerida."
+        )
+    
+    return {
+        "codigo": "OPERACION_SOLICITADA",
+        "mensaje": f"¡Excelente! Solicitud creada exitosamente para {payload.cantidad_cursos} curso(s).",
+        "estado_operacion": "SOLICITADA",
+        "alumno_id": payload.alumno_id,
+        "cursos": payload.cantidad_cursos
+    }
+
+
+# Endpoint para Regla de Negocio RN-12 (Beneficio VIP / Descuento)
+@app.post("/api/v1/beneficios/evaluar")
+def evaluar_beneficio(payload: BeneficioVIPRequest):
+    descuento = 0.0
+    mensaje = "No aplica beneficio adicional."
+    
+    if payload.es_preferente and not payload.promocion_activa:
+        descuento = 0.15 # 15% de descuento
+        mensaje = "¡Beneficio arancelario VIP aplicado correctamente (15% de descuento)! ✨"
+    elif payload.promocion_activa:
+        mensaje = "Ya cuenta con otra promoción activa; no es acumulable con el beneficio VIP."
+
+    monto_final = payload.monto_total * (1 - descuento)
+
+    return {
+        "beneficio_aplicado": descuento > 0,
+        "monto_original": payload.monto_total,
+        "monto_final": round(monto_final, 2),
+        "descuento_porcentaje": int(descuento * 100),
+        "mensaje": mensaje
+    }
+
+
+# Interfaz Visual Interactiva Amigable (/panel)
+@app.get("/panel", response_class=HTMLResponse, include_in_schema=False)
+def panel_control():
     return """
     <!DOCTYPE html>
     <html lang="es">
@@ -39,226 +87,198 @@ async def panel_interactivo():
         <title>EduTech Academy · Panel Operativo</title>
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
-    <body class="bg-slate-950 text-slate-100 font-sans min-h-screen p-6">
-        <div class="max-w-4xl mx-auto space-y-6">
-            <!-- Header -->
-            <header class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl flex justify-between items-center">
+    <body class="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-indigo-500 selection:text-white">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            
+            <!-- Encabezado -->
+            <header class="flex flex-col md:flex-row justify-between items-center bg-slate-900 border border-slate-800 rounded-2xl p-6 mb-8 shadow-xl">
                 <div>
-                    <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                        🎓 EduTech Academy · Panel de Control
+                    <h1 class="text-2xl font-bold flex items-center gap-2">
+                        🎓 <span class="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">EduTech Academy · Panel de Control</span>
                     </h1>
-                    <p class="text-slate-400 text-sm mt-1">Simulador visual de reglas de negocio y operaciones (PIA FIME)</p>
+                    <p class="text-slate-400 text-sm mt-1">Simulador visual intuitivo para validación de reglas de negocio (PIA FIME)</p>
                 </div>
-                <a href="/docs" target="_blank" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-xl transition shadow-lg shadow-indigo-500/20">
-                    Ver Swagger UI 🚀
-                </a>
+                <div class="mt-4 md:mt-0 flex gap-3">
+                    <a href="/docs" target="_blank" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-xl transition shadow-lg shadow-indigo-600/20 flex items-center gap-2">
+                        Ver Swagger UI 🚀
+                    </a>
+                </div>
             </header>
 
-            <!-- Grid de Herramientas -->
-            <div class="grid md:grid-cols-2 gap-6">
-                <!-- Tarjeta 1: Solicitar Inscripción -->
-                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
-                    <h2 class="text-lg font-semibold text-blue-400">📋 Registrar Solicitud (RN-11)</h2>
-                    <div class="space-y-3 text-sm">
-                        <div>
-                            <label class="block text-slate-400 mb-1">ID Alumno</label>
-                            <input id="sol_alumno" type="text" value="EDU-C001" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
+            <!-- Grid de Módulos -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <!-- Módulo 1: Registrar Solicitud (RN-11) -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-indigo-300 flex items-center gap-2 mb-4">
+                            📄 Registrar Solicitud de Cursos <span class="text-xs bg-indigo-950 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-800">RN-11</span>
+                        </h2>
+                        
+                        <form id="formSolicitud" class="space-y-4">
                             <div>
-                                <label class="block text-slate-400 mb-1">Estatus Activo (1/0)</label>
-                                <input id="sol_activo" type="number" value="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+                                <label class="block text-xs font-medium text-slate-400 mb-1">Matrícula o ID del Alumno</label>
+                                <input type="text" id="sol_alumno" value="EDU-C2226867" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition">
                             </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-400 mb-1">Estatus del Alumno</label>
+                                    <select id="sol_activo" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition">
+                                        <option value="true">Activo</option>
+                                        <option value="false">Inactivo</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-400 mb-1">Autorización Académica</label>
+                                    <select id="sol_autorizado" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition">
+                                        <option value="true">Autorizado</option>
+                                        <option value="false">No Autorizado</option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <div>
-                                <label class="block text-slate-400 mb-1">Autorizado (1/0)</label>
-                                <input id="sol_autorizado" type="number" value="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+                                <label class="block text-xs font-medium text-slate-400 mb-1">Cantidad de Cursos (1 a 10)</label>
+                                <input type="number" id="sol_cursos" min="1" max="10" value="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition">
                             </div>
-                        </div>
-                        <div>
-                            <label class="block text-slate-400 mb-1">Cantidad de Cursos (Líneas)</label>
-                            <input id="sol_detalles" type="number" value="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
-                        </div>
-                        <button onclick="probarSolicitud()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl transition shadow-lg shadow-blue-500/20">
-                            Probar Solicitud
-                        </button>
+
+                            <button type="button" onclick="probarSolicitud()" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-medium rounded-xl transition shadow-lg shadow-indigo-600/20">
+                                Ejecutar Solicitud
+                            </button>
+                        </form>
                     </div>
-                    <div id="res_solicitud" class="mt-4 p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 hidden"></div>
+
+                    <!-- Resultado Visual Dinámico -->
+                    <div id="resultadoSolicitud" class="mt-6 hidden p-4 rounded-xl text-sm border"></div>
                 </div>
 
-                <!-- Tarjeta 2: Beneficio VIP -->
-                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
-                    <h2 class="text-lg font-semibold text-indigo-400">💎 Evaluar Beneficio VIP (RN-12)</h2>
-                    <div class="space-y-3 text-sm">
-                        <div>
-                            <label class="block text-slate-400 mb-1">Monto Total ($ MXN)</label>
-                            <input id="ben_monto" type="number" value="1800" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
+                <!-- Módulo 2: Beneficio VIP (RN-12) -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-cyan-300 flex items-center gap-2 mb-4">
+                            💎 Evaluar Beneficio Arancelario <span class="text-xs bg-cyan-950 text-cyan-400 px-2 py-0.5 rounded-full border border-cyan-800">RN-12</span>
+                        </h2>
+                        
+                        <form id="formBeneficio" class="space-y-4">
                             <div>
-                                <label class="block text-slate-400 mb-1">¿Es Preferente? (1/0)</label>
-                                <input id="ben_preferente" type="number" value="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+                                <label class="block text-xs font-medium text-slate-400 mb-1">Monto Total a Pagar ($ MXN)</label>
+                                <input type="number" id="ben_monto" value="2500" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition">
                             </div>
-                            <div>
-                                <label class="block text-slate-400 mb-1">Promoción Activa (1/0)</label>
-                                <input id="ben_promo" type="number" value="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white">
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-400 mb-1">¿Es Estudiante Preferente?</label>
+                                    <select id="ben_preferente" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition">
+                                        <option value="true">Sí (Aplica VIP)</option>
+                                        <option value="false">No</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-400 mb-1">¿Otra Promoción Activa?</label>
+                                    <select id="ben_promo" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition">
+                                        <option value="false">No</option>
+                                        <option value="true">Sí</option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
-                        <button onclick="probarBeneficio()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition shadow-lg shadow-indigo-500/20">
-                            Evaluar Beneficio
-                        </button>
+
+                            <button type="button" onclick="probarBeneficio()" class="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-medium rounded-xl transition shadow-lg shadow-cyan-600/20">
+                                Calcular Beneficio
+                            </button>
+                        </form>
                     </div>
-                    <div id="res_beneficio" class="mt-4 p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 hidden"></div>
+
+                    <!-- Resultado Visual Dinámico -->
+                    <div id="resultadoBeneficio" class="mt-6 hidden p-4 rounded-xl text-sm border"></div>
                 </div>
+
             </div>
         </div>
 
+        <!-- Script de interacción amigable -->
         <script>
             async function probarSolicitud() {
                 const data = {
                     alumno_id: document.getElementById('sol_alumno').value,
-                    programa_id: "EDU-P001",
-                    detalles_count: parseInt(document.getElementById('sol_detalles').value),
-                    activo: parseInt(document.getElementById('sol_activo').value),
-                    autorizado: parseInt(document.getElementById('sol_autorizado').value),
-                    monto_total: 1500.0,
-                    es_preferente: 1,
-                    promocion_activa: 0
+                    estatus_activo: document.getElementById('sol_activo').value === 'true',
+                    autorizado: document.getElementById('sol_autorizado').value === 'true',
+                    cantidad_cursos: parseInt(document.getElementById('sol_cursos').value)
                 };
-                const res = await fetch('/api/v1/operaciones/solicitar', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(data)
-                });
-                const json = await res.json();
-                const box = document.getElementById('res_solicitud');
-                box.classList.remove('hidden');
-                box.innerHTML = `<span class="${res.ok ? 'text-green-400' : 'text-red-400'} font-bold">Status: ${res.status}</span><br>` + JSON.stringify(json, null, 2);
+
+                const resDiv = document.getElementById('resultadoSolicitud');
+                resDiv.classList.remove('hidden');
+                resDiv.className = "mt-6 p-4 rounded-xl text-sm border bg-slate-950 border-slate-800 text-slate-300";
+                resDiv.innerHTML = "⏳ Procesando solicitud...";
+
+                try {
+                    const response = await fetch('/api/v1/solicitudes/registrar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    const json = await response.json();
+
+                    if (response.ok) {
+                        resDiv.className = "mt-6 p-4 rounded-xl text-sm border bg-emerald-950/40 border-emerald-800 text-emerald-200";
+                        resDiv.innerHTML = `
+                            <div class="font-bold flex items-center gap-2 mb-1">✅ Solicitud Aprobada (Código 201)</div>
+                            <p class="text-emerald-300">${json.mensaje}</p>
+                            <div class="text-xs text-emerald-400/80 mt-2">Alumno: ${json.alumno_id} | Cursos: ${json.cursos}</div>
+                        `;
+                    } else {
+                        resDiv.className = "mt-6 p-4 rounded-xl text-sm border bg-rose-950/40 border-rose-800 text-rose-200";
+                        resDiv.innerHTML = `
+                            <div class="font-bold flex items-center gap-2 mb-1">❌ Solicitud Rechazada</div>
+                            <p>${json.detail}</p>
+                        `;
+                    }
+                } catch (err) {
+                    resDiv.className = "mt-6 p-4 rounded-xl text-sm border bg-rose-950/40 border-rose-800 text-rose-200";
+                    resDiv.innerHTML = "❌ Error de conexión con el servidor.";
+                }
             }
 
             async function probarBeneficio() {
                 const data = {
-                    alumno_id: "EDU-C001",
-                    programa_id: "EDU-P001",
-                    detalles_count: 1,
-                    activo: 1,
-                    autorizado: 1,
                     monto_total: parseFloat(document.getElementById('ben_monto').value),
-                    es_preferente: parseInt(document.getElementById('ben_preferente').value),
-                    promocion_activa: parseInt(document.getElementById('ben_promo').value)
+                    es_preferente: document.getElementById('ben_preferente').value === 'true',
+                    promocion_activa: document.getElementById('ben_promo').value === 'true'
                 };
-                const res = await fetch('/api/v1/operaciones/beneficio', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(data)
-                });
-                const json = await res.json();
-                const box = document.getElementById('res_beneficio');
-                box.classList.remove('hidden');
-                box.innerHTML = `<span class="text-green-400 font-bold">Status: ${res.status}</span><br>` + JSON.stringify(json, null, 2);
+
+                const resDiv = document.getElementById('resultadoBeneficio');
+                resDiv.classList.remove('hidden');
+                resDiv.className = "mt-6 p-4 rounded-xl text-sm border bg-slate-950 border-slate-800 text-slate-300";
+                resDiv.innerHTML = "⏳ Evaluando beneficio...";
+
+                try {
+                    const response = await fetch('/api/v1/beneficios/evaluar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    const json = await response.json();
+
+                    if (response.ok) {
+                        resDiv.className = "mt-6 p-4 rounded-xl text-sm border bg-cyan-950/40 border-cyan-800 text-cyan-200";
+                        resDiv.innerHTML = `
+                            <div class="font-bold flex items-center gap-2 mb-1">💎 Evaluación Exitosa (Código 200)</div>
+                            <p class="text-cyan-200 font-medium">${json.mensaje}</p>
+                            <div class="mt-3 pt-3 border-t border-cyan-900/50 grid grid-cols-2 text-xs">
+                                <div>Monto Original: <span class="font-semibold">$${json.monto_original} MXN</span></div>
+                                <div>Monto Final: <span class="font-semibold text-emerald-400">$${json.monto_final} MXN</span></div>
+                            </div>
+                        `;
+                    } else {
+                        resDiv.className = "mt-6 p-4 rounded-xl text-sm border bg-rose-950/40 border-rose-800 text-rose-200";
+                        resDiv.innerHTML = `<div class="font-bold">❌ Error al evaluar beneficio.</div>`;
+                    }
+                } catch (err) {
+                    resDiv.className = "mt-6 p-4 rounded-xl text-sm border bg-rose-950/40 border-rose-800 text-rose-200";
+                    resDiv.innerHTML = "❌ Error de conexión con el servidor.";
+                }
             }
         </script>
     </body>
     </html>
     """
-
-# =========================================================
-# Manejador global para errores de validación en español
-# =========================================================
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    errores_limpios = []
-    for error in exc.errors():
-        ubicacion = error.get("loc", [])
-        campo = str(ubicacion[-1]) if ubicacion else "desconocido"
-        tipo = error.get("type", "")
-        
-        if "missing" in tipo:
-            mensaje = f"¡Vaya! El campo '{campo}' es obligatorio y no fue proporcionado."
-        elif "type_error" in tipo:
-            mensaje = f"El campo '{campo}' tiene un formato o tipo de dato incorrecto."
-        else:
-            mensaje = error.get("msg", "Error de validación en el campo.")
-            
-        errores_limpios.append({
-            "campo": campo,
-            "mensaje": mensaje
-        })
-        
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={
-            "codigo_error": "ERROR_VALIDACION_DATOS",
-            "detalle": "Los datos enviados no cumplen con la estructura requerida.",
-            "errores": errores_limpios
-        }
-    )
-
-# ---------------------------------------------------------
-# Esquemas DTO
-# ---------------------------------------------------------
-class OperacionDTO(BaseModel):
-    alumno_id: str = Field(..., example="EDU-C001", description="Identificador único del alumno.")
-    programa_id: str = Field(..., example="EDU-P001", description="Identificador del programa formativo.")
-    detalles_count: int = Field(..., example=1, description="Número de líneas de detalle en la orden.")
-    activo: int = Field(..., example=1, description="Estatus del alumno (1 = Activo, 0 = Inactivo).")
-    autorizado: int = Field(..., example=1, description="Autorización administrativa (1 = Sí, 0 = No).")
-    monto_total: float = Field(..., example=1800.00, description="Monto total de la orden en MXN.")
-    es_preferente: int = Field(..., example=1, description="Indica si cuenta con estatus VIP (1 = Sí, 0 = No).")
-    promocion_activa: int = Field(..., example=0, description="Indica si posee otra promoción activa (1 = Sí, 0 = No).")
-
-# ---------------------------------------------------------
-# Endpoints de la API REST
-# ---------------------------------------------------------
-
-@app.get("/", tags=["Estado del Sistema"], summary="Verificar estado de la API")
-def read_root():
-    return {
-        "status": "online",
-        "system": "EduTech Academy Core API",
-        "mensaje": "El servicio se encuentra operando correctamente."
-    }
-
-@app.post(
-    "/api/v1/operaciones/solicitar", 
-    status_code=status.HTTP_201_CREATED,
-    tags=["Gestión de Operaciones"],
-    summary="Registrar solicitud de inscripción (US-01)"
-)
-def registrar_solicitud(datos: OperacionDTO):
-    puede_procesarse = (datos.activo == 1) and (datos.detalles_count >= 1) and (datos.autorizado == 1)
-    
-    if not puede_procesarse:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Error de negocio: La regla 'puede_procesarse' (RN-11) no se cumple con los parámetros actuales."
-        )
-        
-    return {
-        "codigo": "OPERACION_SOLICITADA",
-        "mensaje": "¡Excelente! Operación creada exitosamente en estatus SOLICITADA. 🎉",
-        "estado_operacion": "SOLICITADA",
-        "alumno_id": datos.alumno_id,
-        "programa_id": datos.programa_id
-    }
-
-@app.post(
-    "/api/v1/operaciones/beneficio", 
-    status_code=status.HTTP_200_OK,
-    tags=["Motor de Reglas y Finanzas"],
-    summary="Evaluar concesión de beneficio arancelario VIP (US-22)"
-)
-def evaluar_beneficio(datos: OperacionDTO):
-    aplica_beneficio = (
-        datos.es_preferente == 1 and 
-        datos.monto_total >= 1500.00 and 
-        datos.promocion_activa == 0
-    )
-    
-    monto_final = datos.monto_total * 0.85 if aplica_beneficio else datos.monto_total
-    
-    return {
-        "beneficio_aplicado": aplica_beneficio,
-        "monto_original": datos.monto_total,
-        "monto_final": round(monto_final, 2),
-        "mensaje": "¡Beneficio arancelario VIP aplicado correctamente (15% de descuento)! ✨" if aplica_beneficio else "No aplica descuento VIP (se mantiene importe ordinario)."
-    }
